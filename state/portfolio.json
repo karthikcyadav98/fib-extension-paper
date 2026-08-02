@@ -1,0 +1,37 @@
+{
+  "start_equity": 1000.0,
+  "equity": 1000.0,
+  "realised_pnl": 0.0,
+  "risk_pct": 0.01,
+  "started_at": 1785655307226,
+  "last_update": 1785655337782,
+  "positions": [],
+  "closed": [],
+  "equity_curve": [
+    {
+      "ts": 1785655337782,
+      "equity": 1000.0,
+      "equity_mtm": 1000.0
+    }
+  ],
+  "last_bar": {
+    "EURUSD": 1785531600000,
+    "GBPUSD": 1785538740000,
+    "USDJPY": 1785531600000,
+    "AUDUSD": 1785531600000,
+    "BTCUSDT": 1785628800000,
+    "ETHUSDT": 1785628800000,
+    "SOLUSDT": 1785628800000,
+    "BNBUSDT": 1785628800000,
+    "NIFTY": 1785469500000,
+    "RELIANCE": 1785469500000,
+    "HDFCBANK": 1785469500000,
+    "INFY": 1785469500000,
+    "TCS": 1785469500000
+  },
+  "signals": [],
+  "errors": [],
+  "unrealised_pnl": 0.0,
+  "equity_mtm": 1000.0,
+  "events": []
+}
