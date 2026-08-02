@@ -4,12 +4,17 @@
   "realised_pnl": 0.0,
   "risk_pct": 0.01,
   "started_at": 1785655307226,
-  "last_update": 1785655337782,
+  "last_update": 1785665510441,
   "positions": [],
   "closed": [],
   "equity_curve": [
     {
       "ts": 1785655337782,
+      "equity": 1000.0,
+      "equity_mtm": 1000.0
+    },
+    {
+      "ts": 1785665510441,
       "equity": 1000.0,
       "equity_mtm": 1000.0
     }
@@ -19,10 +24,10 @@
     "GBPUSD": 1785538740000,
     "USDJPY": 1785531600000,
     "AUDUSD": 1785531600000,
-    "BTCUSDT": 1785628800000,
-    "ETHUSDT": 1785628800000,
-    "SOLUSDT": 1785628800000,
-    "BNBUSDT": 1785628800000,
+    "BTCUSDT": 1785643200000,
+    "ETHUSDT": 1785643200000,
+    "SOLUSDT": 1785643200000,
+    "BNBUSDT": 1785643200000,
     "NIFTY": 1785469500000,
     "RELIANCE": 1785469500000,
     "HDFCBANK": 1785469500000,
