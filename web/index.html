@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trend-Based Fib Extension — Live Signals & Paper P&L</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --plane: #f9f9f7;
+    --surface-1: #fcfcfb;
+    --border: #e2e1dc;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #78776f;
+    --series-1: #2a78d6;
+    --good: #0ca30c;
+    --warning: #fab219;
+    --critical: #d03b3b;
+    --grid: #ecebe6;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      --plane: #0d0d0d;
+      --surface-1: #1a1a19;
+      --border: #33322f;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted: #8e8d84;
+      --series-1: #3987e5;
+      --grid: #262523;
+    }
+  }
+  :root[data-theme="dark"] {
+    --plane: #0d0d0d; --surface-1: #1a1a19; --border: #33322f;
+    --text-primary: #fff; --text-secondary: #c3c2b7; --text-muted: #8e8d84;
+    --series-1: #3987e5; --grid: #262523;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--plane); color: var(--text-primary);
+    font: 15px/1.5 ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 20px 72px; }
+
+  header { display: flex; flex-wrap: wrap; gap: 16px; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+  h1 { font-size: 21px; font-weight: 640; letter-spacing: -0.02em; margin: 0; }
+  .sub { color: var(--text-secondary); font-size: 13.5px; margin: 0 0 26px; max-width: 70ch; }
+  .controls { display: flex; gap: 8px; align-items: center; }
+  button {
+    font: inherit; font-size: 13px; padding: 6px 13px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface-1);
+    color: var(--text-primary); cursor: pointer;
+  }
+  button:hover { border-color: var(--text-muted); }
+
+  .banner {
+    display: flex; gap: 10px; align-items: flex-start;
+    border: 1px solid var(--border); border-left: 3px solid var(--warning);
+    background: var(--surface-1); border-radius: 10px;
+    padding: 12px 16px; margin-bottom: 26px; font-size: 13.5px;
+    color: var(--text-secondary);
+  }
+  .banner strong { color: var(--text-primary); }
+
+  section { margin-bottom: 34px; }
+  h2 {
+    font-size: 12px; font-weight: 660; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--text-muted);
+    margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); gap: 12px; }
+  .tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 11px; padding: 14px 16px; }
+  .tile .k { font-size: 11.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .tile .v { font-size: 25px; font-weight: 620; letter-spacing: -0.025em; margin-top: 5px; font-variant-numeric: tabular-nums; }
+  .tile .n { font-size: 12px; color: var(--text-secondary); margin-top: 3px; font-variant-numeric: tabular-nums; }
+  .up { color: var(--good); } .down { color: var(--critical); }
+
+  .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 11px; padding: 16px; }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+  th {
+    text-align: right; font-weight: 580; color: var(--text-muted); font-size: 11.5px;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    padding: 0 10px 8px; border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--grid); }
+  .sym { font-weight: 580; }
+  .mono { font-family: var(--mono); font-size: 12.5px; }
+  .tag {
+    display: inline-block; font-size: 10.5px; font-weight: 620; letter-spacing: 0.04em;
+    text-transform: uppercase; padding: 2px 7px; border-radius: 5px;
+    border: 1px solid var(--border); color: var(--text-secondary);
+  }
+  .tag.long { color: var(--good); border-color: color-mix(in srgb, var(--good) 40%, transparent); }
+  .tag.short { color: var(--critical); border-color: color-mix(in srgb, var(--critical) 40%, transparent); }
+
+  .empty { color: var(--text-muted); font-size: 13.5px; padding: 22px 4px; text-align: center; }
+  figure { margin: 0; }
+  figcaption { font-size: 12.5px; color: var(--text-secondary); margin-top: 10px; }
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .foot { color: var(--text-muted); font-size: 12.5px; margin-top: 40px; line-height: 1.7; }
+  code { font-family: var(--mono); font-size: 12px; background: var(--grid); padding: 1.5px 5px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Trend-Based Fibonacci Extension</h1>
+    <div class="controls">
+      <span id="stamp" style="font-size:12px;color:var(--text-muted)"></span>
+      <button id="theme">Theme</button>
+      <button id="reload">Refresh</button>
+    </div>
+  </header>
+  <p class="sub">
+    Mechanised P1&#8209;P2&#8209;P3 swing anchoring, EMA50/200 trend filter, stop below the pullback,
+    scale&#8209;out at the 1.272 and 1.618 extensions. Live paper account funded with $1,000.
+  </p>
+
+  <div class="banner">
+    <span aria-hidden="true">&#9888;</span>
+    <div>
+      <strong>Simulated, not advice.</strong> Across a 72&#8209;configuration parameter sweep on 1,281 historical
+      trades, exactly <strong>1 configuration</strong> was profitable and the median was
+      <strong>&minus;0.12R per trade</strong>. The settings running live here are the best cell of that sweep,
+      so they are optimistic by selection. Expect the live result to be worse.
+    </div>
+  </div>
+
+  <section>
+    <h2>Live paper account</h2>
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <section>
+    <h2>Equity</h2>
+    <div class="card"><figure>
+      <div id="equity"></div>
+      <figcaption id="equity-cap">Mark&#8209;to&#8209;market equity, $1,000 start. 1% of equity risked per trade.</figcaption>
+    </figure></div>
+  </section>
+
+  <section>
+    <h2>Open positions</h2>
+    <div class="card scroll" id="open"></div>
+  </section>
+
+  <section>
+    <h2>Signals — last 30 bars</h2>
+    <div class="card scroll" id="signals"></div>
+  </section>
+
+  <section>
+    <h2>Closed trades</h2>
+    <div class="card scroll" id="closed"></div>
+  </section>
+
+  <section>
+    <h2>Execution log — every fill</h2>
+    <div class="card scroll" id="fills"></div>
+  </section>
+
+  <section>
+    <h2>Backtest by market — fib exits vs. a flat 2R null model</h2>
+    <div class="card scroll" id="bt"></div>
+  </section>
+
+  <p class="foot">
+    Data: Binance public REST (crypto 4h) and Yahoo Finance chart API (forex 1h, India 1d) — both keyless.
+    Costs are charged one&#8209;way per fill and include spread, commission and slippage.
+    A bar containing both stop and target is scored as a <em>stop</em>; gaps fill at the open.<br>
+    Refresh the account with <code>python3 run.py update</code>.
+  </p>
+
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const money = n => (n < 0 ? "-$" : "$") + Math.abs(n).toFixed(2);
+const sgn = n => (n >= 0 ? "+" : "−") + Math.abs(n).toFixed(2);
+const cls = n => n > 0 ? "up" : n < 0 ? "down" : "";
+const num = (v, d = 2) => v === null || v === undefined ? "—" :
+  (Math.abs(v) >= 1000 ? v.toFixed(d) : v.toPrecision(6).replace(/\.?0+$/, ""));
+const when = ts => new Date(ts).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+
+function table(cols, rows, empty) {
+  if (!rows.length) return `<div class="empty">${empty}</div>`;
+  return `<table><thead><tr>${cols.map(c => `<th>${c}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+}
+const side = s => `<span class="tag ${s}">${s}</span>`;
+
+// ---- equity curve: single series, so no legend; the title names it ----
+function equityChart(points) {
+  const el = $("#equity");
+  if (points.length < 2) {
+    el.innerHTML = `<div class="empty">Equity curve appears once the account has recorded more than one update.</div>`;
+    return;
+  }
+  const W = 900, H = 240, P = { t: 14, r: 58, b: 26, l: 10 };
+  const xs = points.map(p => p.ts), ys = points.map(p => p.equity_mtm ?? p.equity);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  let y0 = Math.min(...ys, 1000), y1 = Math.max(...ys, 1000);
+  const pad = (y1 - y0) * 0.18 || 12; y0 -= pad; y1 += pad;
+  const X = v => P.l + (x1 === x0 ? 0 : (v - x0) / (x1 - x0)) * (W - P.l - P.r);
+  const Y = v => P.t + (1 - (v - y0) / (y1 - y0)) * (H - P.t - P.b);
+
+  const ticks = [y0, (y0 + y1) / 2, y1].map(v =>
+    `<line x1="${P.l}" x2="${W - P.r}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" stroke="var(--grid)" stroke-width="1"/>
+     <text x="${W - P.r + 8}" y="${(Y(v) + 4).toFixed(1)}" fill="var(--text-muted)" font-size="11">$${v.toFixed(0)}</text>`).join("");
+
+  const base = `<line x1="${P.l}" x2="${W - P.r}" y1="${Y(1000).toFixed(1)}" y2="${Y(1000).toFixed(1)}"
+      stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="3 3"/>
+    <text x="${W - P.r + 8}" y="${(Y(1000) + 4).toFixed(1)}" fill="var(--text-muted)" font-size="11">start</text>`;
+
+  const d = points.map((p, i) => `${i ? "L" : "M"}${X(p.ts).toFixed(1)},${Y(p.equity_mtm ?? p.equity).toFixed(1)}`).join(" ");
+  const last = points[points.length - 1];
+
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img"
+      aria-label="Paper account equity over time, starting at 1000 dollars.">
+    ${ticks}${base}
+    <path d="${d}" fill="none" stroke="var(--series-1)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${X(last.ts).toFixed(1)}" cy="${Y(last.equity_mtm ?? last.equity).toFixed(1)}" r="4.5"
+            fill="var(--series-1)" stroke="var(--surface-1)" stroke-width="2"/>
+    <text x="${P.l}" y="${H - 6}" fill="var(--text-muted)" font-size="11">${when(x0)}</text>
+    <text x="${W - P.r}" y="${H - 6}" fill="var(--text-muted)" font-size="11" text-anchor="end">${when(x1)}</text>
+  </svg>`;
+}
+
+function renderPortfolio(s) {
+  const eq = s.equity_mtm ?? s.equity, pnl = eq - s.start_equity;
+  const closed = s.closed || [], wins = closed.filter(c => c.realised > 0);
+  const days = s.last_update ? (s.last_update - s.started_at) / 86400000 : 0;
+
+  $("#tiles").innerHTML = [
+    [`Equity (MTM)`, money(eq), `${sgn(100 * pnl / s.start_equity)}% from $1,000`, cls(pnl)],
+    [`Net P&L`, sgn(pnl), `realised ${sgn(s.realised_pnl || 0)} · open ${sgn(s.unrealised_pnl || 0)}`, cls(pnl)],
+    [`Day`, days.toFixed(1) + " / 7", `${(s.positions || []).length} open · ${closed.length} closed`, ""],
+    [`Win rate`, closed.length ? (100 * wins.length / closed.length).toFixed(0) + "%" : "—",
+      closed.length ? `${wins.length}W / ${closed.length - wins.length}L` : "no trades closed yet", ""],
+  ].map(([k, v, n, c]) => `<div class="tile"><div class="k">${k}</div>
+      <div class="v ${c}">${v}</div><div class="n">${n}</div></div>`).join("");
+
+  equityChart(s.equity_curve || []);
+
+  $("#open").innerHTML = table(
+    ["Symbol", "Side", "Entry", "Now", "Stop", "T1", "T2", "Unreal."],
+    (s.positions || []).map(p => {
+      const u = (p.side === "long" ? p.last_price - p.entry : p.entry - p.last_price) * p.qty_open;
+      return [`<span class="sym">${p.symbol}</span>`, side(p.side),
+        `<span class="mono">${num(p.entry)}</span>`, `<span class="mono">${num(p.last_price)}</span>`,
+        `<span class="mono">${num(p.cur_stop)}</span>`, `<span class="mono">${num(p.t1)}</span>`,
+        `<span class="mono">${num(p.t2)}</span>`, `<span class="${cls(u)}">${sgn(u)}</span>`];
+    }), "No open positions. The strategy is selective — most bars produce nothing.");
+
+  $("#closed").innerHTML = table(
+    ["Symbol", "Side", "Exit", "Entry", "R", "P&L", "Closed"],
+    closed.slice().reverse().map(c => [
+      `<span class="sym">${c.symbol}</span>`, side(c.side), c.exit_reason,
+      `<span class="mono">${num(c.entry)}</span>`,
+      `<span class="${cls(c.R)}">${sgn(c.R)}R</span>`,
+      `<span class="${cls(c.realised)}">${sgn(c.realised)}</span>`,
+      `<span style="color:var(--text-secondary)">${when(c.closed_ts)}</span>`]),
+    "Nothing closed yet.");
+
+  renderFills([...(s.positions || []), ...closed]);
+  $("#stamp").textContent = s.last_update ? "updated " + when(s.last_update) : "";
+}
+
+// Every individual fill, not just the round trip. The strategy exits in pieces,
+// so a single trade can print four rows: entry, half at T1, stop moved to
+// breakeven, remainder at T2.
+const FILL_LABEL = {
+  entry: ["Entry", "opened the position"],
+  t1: ["Scale out — T1", "half off at the 1.272 extension"],
+  t2: ["Scale out — T2", "remainder at the 1.618 extension"],
+  stop: ["Stopped out", "hit the initial stop"],
+  breakeven: ["Breakeven stop", "runner stopped at entry after T1"],
+  time: ["Time exit", "closed after the max holding period"],
+};
+
+function renderFills(positions) {
+  const rows = [];
+  for (const p of positions) {
+    rows.push({ ts: p.opened_ts, sym: p.symbol, side: p.side, kind: "entry",
+                price: p.entry, qty: p.qty, pnl: null });
+    for (const f of (p.fills || []))
+      rows.push({ ts: f.ts, sym: p.symbol, side: p.side, kind: f.kind,
+                  price: f.price, qty: f.qty, pnl: f.pnl });
+  }
+  rows.sort((a, b) => b.ts - a.ts);
+
+  $("#fills").innerHTML = table(
+    ["Time", "Symbol", "Side", "Action", "Price", "Qty", "Realised"],
+    rows.map(r => {
+      const [label, note] = FILL_LABEL[r.kind] || [r.kind, ""];
+      return [
+        `<span style="color:var(--text-secondary)">${when(r.ts)}</span>`,
+        `<span class="sym">${r.sym}</span>`, side(r.side),
+        `${label}<div style="font-size:11.5px;color:var(--text-muted)">${note}</div>`,
+        `<span class="mono">${num(r.price)}</span>`,
+        `<span class="mono">${r.qty < 1 ? r.qty.toPrecision(3) : r.qty.toFixed(4)}</span>`,
+        r.pnl === null ? "—" : `<span class="${cls(r.pnl)}">${sgn(r.pnl)}</span>`];
+    }),
+    "No fills yet. Each entry, scale-out and stop will appear here as it happens.");
+}
+
+function renderSignals(d) {
+  $("#signals").innerHTML = table(
+    ["Symbol", "Market", "Side", "Entry", "Stop", "T1 (1.272)", "T2 (1.618)", "R:R", "Retrace", "When"],
+    (d.signals || []).map(s => [
+      `<span class="sym">${s.symbol}</span>`,
+      `<span style="color:var(--text-secondary)">${s.market}</span>`, side(s.side),
+      `<span class="mono">${num(s.entry)}</span>`, `<span class="mono">${num(s.stop)}</span>`,
+      `<span class="mono">${num(s.t1)}</span>`, `<span class="mono">${num(s.t2)}</span>`,
+      s.rr_t1.toFixed(2), (100 * s.retrace).toFixed(0) + "%",
+      `<span style="color:var(--text-secondary)">${when(s.ts)}</span>`]),
+    "No setups triggered on the last 30 bars of any instrument.");
+}
+
+function renderBacktest(b) {
+  const rows = [];
+  for (const [mkt, m] of Object.entries(b.markets || {})) {
+    for (const mode of ["fib", "r2"]) {
+      const s = m[mode];
+      if (!s || !s.trades) continue;
+      rows.push([
+        `<span class="sym">${mkt}</span> <span style="color:var(--text-muted)">${mode === "fib" ? "1.272/1.618" : "flat 2R"}</span>`,
+        s.trades, s.win_rate.toFixed(1) + "%", sgn(s.avg_R) + "R",
+        `<span class="${cls(s.total_R)}">${sgn(s.total_R)}R</span>`,
+        (s.profit_factor > 99 ? "∞" : s.profit_factor.toFixed(2)),
+        `<span class="${cls(s.return_pct)}">${sgn(s.return_pct)}%</span>`,
+        s.max_dd_pct.toFixed(1) + "%"]);
+    }
+  }
+  $("#bt").innerHTML = table(["Market / exit model", "Trades", "Win rate", "Avg R", "Total R", "PF", "Return", "Max DD"],
+    rows, "Run python3 run.py backtest to populate this.");
+}
+
+// Works in both homes: the local stdlib server exposes /api/*, while GitHub
+// Pages is static and only has the committed JSON. Try the live endpoint first,
+// fall back to the file. Paths are relative so Pages can serve from /<repo>/.
+async function load() {
+  const one = async u => { try { const r = await fetch(u, { cache: "no-store" }); return r.ok ? await r.json() : null; } catch { return null; } };
+  const get = async name => {
+    for (const u of [`api/${name}`, `state/${name}.json`]) {
+      const j = await one(u);
+      if (j && !j.error) return j;
+    }
+    return null;
+  };
+  const [p, s, b] = await Promise.all([get("portfolio"), get("signals"), get("backtest")]);
+  if (p && !p.error) renderPortfolio(p);
+  if (s && !s.error) renderSignals(s);
+  if (b && !b.error) renderBacktest(b);
+}
+
+$("#reload").onclick = load;
+$("#theme").onclick = () => {
+  const dark = document.documentElement.getAttribute("data-theme") === "dark";
+  document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
+};
+load();
+setInterval(load, 60000);
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+cache/
+__pycache__/
+*.pyc
+state/cron.log
+state/*.tmp
+state/server.log

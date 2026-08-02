@@ -1,0 +1,81 @@
+name: paper-trade
+
+# Hourly advance of the $1,000 paper account, then publish the dashboard.
+#
+# GitHub's scheduled runs are best-effort and are routinely delayed by 10-60
+# minutes at peak. That is fine here: `run.py update` replays every bar that
+# printed since the last run, so a late or skipped run costs nothing but
+# freshness. Crypto fails over to Kraken because Binance returns 451 to the
+# US-based runners.
+
+on:
+  schedule:
+    - cron: "17 * * * *"   # off the hour: :00 is the most contended slot
+  workflow_dispatch:        # lets you (or me) trigger a run on demand
+  push:
+    branches: [main]
+
+permissions:
+  contents: write   # commit the updated state back
+  pages: write
+  id-token: write
+
+concurrency:
+  group: paper-trade
+  cancel-in-progress: false   # never interrupt a run mid-write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Advance the paper account
+        run: |
+          python3 run.py update
+          python3 run.py report
+
+      - name: Commit state
+        run: |
+          git config user.name  "paper-trade bot"
+          git config user.email "actions@github.com"
+          git add -A state/
+          if git diff --staged --quiet; then
+            echo "no state change"
+          else
+            git commit -m "paper: $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git push
+          fi
+
+      - name: Job summary
+        run: |
+          echo '### Paper account' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          python3 run.py report >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Assemble the site
+        run: |
+          mkdir -p _site/state
+          cp web/index.html _site/
+          cp state/portfolio.json state/signals.json _site/state/ 2>/dev/null || true
+          cp state/backtest.json _site/state/ 2>/dev/null || true
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: update
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
