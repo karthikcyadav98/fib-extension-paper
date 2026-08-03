@@ -42,6 +42,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._json_file("backtest.json")
         if path == "/api/signals":
             return self._json_file("signals.json")
+        if path == "/api/charts":
+            return self._json_file("charts.json")
         if path == "/api/refresh":
             from . import paper
             state = paper.update(verbose=False)

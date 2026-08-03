@@ -106,6 +106,17 @@ a split-half test — noise, not signal.
 best cell of the sweep — chosen *after* seeing results. Live performance should
 be expected to fall short of the backtest, not match it.
 
+## Data latency — read this before calling it "live"
+
+Bars come from Yahoo's 1h feed, resampled to 4h, and the runner fires hourly.
+**A just-closed bar is therefore up to ~55 minutes old**, and a 4h bar only
+finalises every 4 hours. That is fine for a 4h strategy — no signal is missed,
+because `update` replays every bar since the last run — but it is *hourly batch*,
+not streaming, and the dashboard timestamp reflects that.
+
+For true streaming prices and real demo-account order execution, the system
+needs an **OANDA practice API token** (free). See `LIVE.md`.
+
 ## Live paper account
 
 `run.py update` is idempotent per bar: every symbol stores the timestamp of the

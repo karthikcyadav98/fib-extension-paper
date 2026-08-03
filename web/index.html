@@ -106,6 +106,12 @@
   figure { margin: 0; }
   figcaption { font-size: 12.5px; color: var(--text-secondary); margin-top: 10px; }
   svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .pairbar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .pairbar button { font-size: 12px; padding: 4px 9px; font-variant-numeric: tabular-nums; }
+  .pairbar button.on { border-color: var(--series-1); color: var(--series-1); font-weight: 600; }
+  .pairbar button .dot { color: var(--warning); font-size: 15px; line-height: 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--text-secondary); margin-top: 10px; }
+  .legend i { display: inline-block; width: 14px; height: 2px; vertical-align: middle; margin-right: 5px; }
   .foot { color: var(--text-muted); font-size: 12.5px; margin-top: 40px; line-height: 1.7; }
   code { font-family: var(--mono); font-size: 12px; background: var(--grid); padding: 1.5px 5px; border-radius: 4px; }
 </style>
@@ -152,6 +158,17 @@
   <section>
     <h2>Open positions</h2>
     <div class="card scroll" id="open"></div>
+  </section>
+
+  <section>
+    <h2>Chart — candles with the live fib geometry</h2>
+    <div class="card">
+      <div id="pairbar" class="pairbar"></div>
+      <figure>
+        <div id="candles"></div>
+        <figcaption id="candle-cap"></figcaption>
+      </figure>
+    </div>
   </section>
 
   <section>
@@ -314,6 +331,116 @@ function renderFills(positions) {
     "No fills yet. Each entry, scale-out and stop will appear here as it happens.");
 }
 
+// ---- candlestick chart with the strategy's own fib geometry ----
+let CHARTS = null, PAIR = null;
+
+function renderPairbar() {
+  const names = Object.keys(CHARTS.pairs);
+  if (!PAIR || !CHARTS.pairs[PAIR]) {
+    PAIR = names.find(n => CHARTS.pairs[n].position) ||
+           names.find(n => CHARTS.pairs[n].setup) || names[0];
+  }
+  $("#pairbar").innerHTML = names.map(n => {
+    const p = CHARTS.pairs[n];
+    // a dot marks a pair that currently has a fib setup on the chart
+    return `<button data-p="${n}" class="${n === PAIR ? "on" : ""}">${n}${p.setup ? ' <span class="dot">&bull;</span>' : ""}</button>`;
+  }).join("");
+  $("#pairbar").querySelectorAll("button").forEach(b =>
+    b.onclick = () => { PAIR = b.dataset.p; renderPairbar(); drawCandles(); });
+}
+
+function drawCandles() {
+  const d = CHARTS.pairs[PAIR];
+  const bars = d.bars, W = 980, H = 420, P = { t: 16, r: 74, b: 30, l: 8 };
+  const geo = d.position || d.setup;
+
+  let lo = Math.min(...bars.map(b => b[3])), hi = Math.max(...bars.map(b => b[2]));
+  if (geo) { lo = Math.min(lo, geo.stop, geo.t2); hi = Math.max(hi, geo.stop, geo.t2); }
+  const pad = (hi - lo) * 0.06 || 1; lo -= pad; hi += pad;
+
+  const n = bars.length;
+  const cw = (W - P.l - P.r) / n;
+  const X = i => P.l + i * cw + cw / 2;
+  const Y = v => P.t + (1 - (v - lo) / (hi - lo)) * (H - P.t - P.b);
+  const tsX = ts => { // nearest bar index for an arbitrary timestamp
+    let bi = 0, bd = Infinity;
+    bars.forEach((b, i) => { const dd = Math.abs(b[0] - ts); if (dd < bd) { bd = dd; bi = i; } });
+    return X(bi);
+  };
+
+  const dec = d.last < 5 ? 5 : d.last < 500 ? 3 : 2;
+  const grid = [0, 0.25, 0.5, 0.75, 1].map(f => {
+    const v = lo + f * (hi - lo);
+    return `<line x1="${P.l}" x2="${W - P.r}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" stroke="var(--grid)"/>
+      <text x="${W - P.r + 7}" y="${(Y(v) + 4).toFixed(1)}" fill="var(--text-muted)" font-size="11">${v.toFixed(dec)}</text>`;
+  }).join("");
+
+  const candles = bars.map((b, i) => {
+    const [, o, h, l, c] = b, up = c >= o;
+    const col = up ? "var(--good)" : "var(--critical)";
+    const bw = Math.max(1.2, cw * 0.62);
+    const yO = Y(o), yC = Y(c);
+    return `<line x1="${X(i).toFixed(1)}" x2="${X(i).toFixed(1)}" y1="${Y(h).toFixed(1)}" y2="${Y(l).toFixed(1)}" stroke="${col}" stroke-width="1"/>
+      <rect x="${(X(i) - bw / 2).toFixed(1)}" y="${Math.min(yO, yC).toFixed(1)}" width="${bw.toFixed(1)}"
+            height="${Math.max(1, Math.abs(yC - yO)).toFixed(1)}" fill="${col}"/>`;
+  }).join("");
+
+  let overlay = "", caption = `${PAIR} · 4h · last ${d.last.toFixed(dec)}`;
+  if (geo) {
+    const lvl = (v, col, label, dash) => `
+      <line x1="${P.l}" x2="${W - P.r}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}"
+            stroke="${col}" stroke-width="1.5" ${dash ? 'stroke-dasharray="5 4"' : ""}/>
+      <text x="${P.l + 4}" y="${(Y(v) - 5).toFixed(1)}" fill="${col}" font-size="11" font-weight="600">${label}</text>`;
+    overlay += lvl(geo.stop, "var(--critical)", `stop ${geo.stop.toFixed(dec)}`, true);
+    overlay += lvl(geo.entry, "var(--text-secondary)", `entry ${geo.entry.toFixed(dec)}`, false);
+    overlay += lvl(geo.t1, "var(--series-1)", `T1 · 1.272 ${geo.t1.toFixed(dec)}`, true);
+    overlay += lvl(geo.t2, "var(--series-1)", `T2 · 1.618 ${geo.t2.toFixed(dec)}`, true);
+
+    const s = d.setup;
+    if (s) { // the P1->P2->P3 impulse-and-pullback the algorithm anchored on
+      const pts = [s.p1, s.p2, s.p3];
+      overlay += `<polyline points="${pts.map(p => `${tsX(p.ts).toFixed(1)},${Y(p.price).toFixed(1)}`).join(" ")}"
+                    fill="none" stroke="var(--warning)" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+      overlay += pts.map((p, i) => `
+        <circle cx="${tsX(p.ts).toFixed(1)}" cy="${Y(p.price).toFixed(1)}" r="4.5"
+                fill="var(--warning)" stroke="var(--surface-1)" stroke-width="2"/>
+        <text x="${tsX(p.ts).toFixed(1)}" y="${(Y(p.price) - 11).toFixed(1)}" fill="var(--warning)"
+              font-size="11" font-weight="700" text-anchor="middle">P${i + 1}</text>`).join("");
+      caption += ` · ${s.side.toUpperCase()} setup, retrace ${(100 * s.retrace).toFixed(0)}%, R:R ${s.rr.toFixed(2)}`;
+      caption += s.traded ? " · position open" : " · not traded (fired before this bar)";
+    }
+    if (d.position) caption += ` · OPEN ${d.position.side}${d.position.scaled_t1 ? ", half off at T1" : ""}`;
+  } else {
+    caption += " · no fib setup on this window";
+  }
+
+  const f = ms => new Date(ms).toLocaleDateString([], { month: "short", day: "numeric" });
+  $("#candles").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img"
+      aria-label="${PAIR} 4-hour candles with fibonacci extension levels">
+    ${grid}${candles}${overlay}
+    <text x="${P.l}" y="${H - 8}" fill="var(--text-muted)" font-size="11">${f(bars[0][0])}</text>
+    <text x="${W - P.r}" y="${H - 8}" fill="var(--text-muted)" font-size="11" text-anchor="end">${f(bars[n - 1][0])}</text>
+  </svg>
+  <div class="legend">
+    <span><i style="background:var(--warning)"></i>P1→P2→P3 anchors</span>
+    <span><i style="background:var(--text-secondary)"></i>entry</span>
+    <span><i style="background:var(--critical)"></i>stop</span>
+    <span><i style="background:var(--series-1)"></i>1.272 / 1.618 targets</span>
+    <span>&bull; = pair has a live setup</span>
+  </div>`;
+  $("#candle-cap").textContent = caption;
+}
+
+function renderCharts(c) {
+  CHARTS = c;
+  if (!c || !c.pairs || !Object.keys(c.pairs).length) {
+    $("#candles").innerHTML = `<div class="empty">No chart data yet — run python3 run.py charts.</div>`;
+    return;
+  }
+  renderPairbar();
+  drawCandles();
+}
+
 function renderSignals(d) {
   $("#signals").innerHTML = table(
     ["Symbol", "Market", "Side", "Entry", "Stop", "T1 (1.272)", "T2 (1.618)", "R:R", "Retrace", "When"],
@@ -358,10 +485,11 @@ async function load() {
     }
     return null;
   };
-  const [p, s, b] = await Promise.all([get("portfolio"), get("signals"), get("backtest")]);
+  const [p, s, b, c] = await Promise.all([get("portfolio"), get("signals"), get("backtest"), get("charts")]);
   if (p && !p.error) renderPortfolio(p);
   if (s && !s.error) renderSignals(s);
   if (b && !b.error) renderBacktest(b);
+  if (c && !c.error) renderCharts(c);
 }
 
 $("#reload").onclick = load;

@@ -265,3 +265,60 @@ def update(state=None, ttl=120, verbose=True):
         print(f"  equity ${state['equity']:.2f}  mtm ${state['equity_mtm']:.2f}  "
               f"open {len(state['positions'])}  closed {len(state['closed'])}")
     return state
+
+
+def build_charts(bars_back=140, ttl=120):
+    """Per-pair OHLC plus the live fib geometry, for the dashboard's candles.
+
+    Emits the exact anchors the strategy used -- P1/P2/P3, the stop and the
+    1.272/1.618 projections -- so the chart shows what the algorithm actually
+    saw, not a redrawn approximation of it.
+    """
+    cfg = strategy.config()
+    state = load()
+    open_by = {p["symbol"]: p for p in state.get("positions", [])}
+    out = {}
+
+    for inst in universe.UNIVERSE:
+        try:
+            bars = data.fetch(inst, ttl=ttl)
+        except Exception:
+            continue
+        if len(bars) < 300:
+            continue
+
+        sigs = strategy.scan(bars, cfg, first_idx=max(0, len(bars) - 60))
+        sig = sigs[-1] if sigs else None
+        window = bars[-bars_back:]
+        base = len(bars) - len(window)
+
+        setup = None
+        if sig:
+            setup = {
+                "side": sig["side"], "ts": sig["ts"],
+                "entry": sig["entry"], "stop": sig["stop"],
+                "t1": sig["t1"], "t2": sig["t2"],
+                "rr": sig["rr_t1"], "retrace": sig["retrace"],
+                "p1": {"ts": sig["p1"]["ts"], "price": sig["p1"]["price"]},
+                "p2": {"ts": sig["p2"]["ts"], "price": sig["p2"]["price"]},
+                "p3": {"ts": sig["p3"]["ts"], "price": sig["p3"]["price"]},
+                "traded": inst["id"] in open_by,
+            }
+
+        pos = open_by.get(inst["id"])
+        out[inst["id"]] = {
+            "interval": "4h",
+            "last": window[-1]["close"],
+            "last_ts": window[-1]["close_ts"],
+            # compact: [ts, o, h, l, c] -- keeps the payload small enough to
+            # ship all 16 pairs in one static file
+            "bars": [[b["ts"], b["open"], b["high"], b["low"], b["close"]] for b in window],
+            "setup": setup,
+            "position": None if not pos else {
+                "side": pos["side"], "entry": pos["entry"], "stop": pos["cur_stop"],
+                "t1": pos["t1"], "t2": pos["t2"], "opened_ts": pos["opened_ts"],
+                "scaled_t1": pos["scaled_t1"],
+            },
+        }
+        _ = base
+    return {"generated": int(time.time() * 1000), "pairs": out}

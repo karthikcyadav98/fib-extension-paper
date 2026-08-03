@@ -62,7 +62,7 @@ jobs:
         run: |
           mkdir -p _site/state
           cp web/index.html _site/
-          cp state/portfolio.json state/signals.json _site/state/ 2>/dev/null || true
+          cp state/portfolio.json state/signals.json state/charts.json _site/state/ 2>/dev/null || true
           cp state/backtest.json _site/state/ 2>/dev/null || true
 
       - uses: actions/configure-pages@v5

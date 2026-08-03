@@ -132,6 +132,15 @@ def cmd_update():
     state = paper.update(verbose=True)
     paper.save(state)
     cmd_signals()
+    cmd_charts()
+
+
+def cmd_charts():
+    """OHLC + live fib geometry for the dashboard's candlestick view."""
+    charts = paper.build_charts()
+    _write("charts.json", charts)
+    live = [k for k, v in charts["pairs"].items() if v["setup"]]
+    print(f"  charts: {len(charts['pairs'])} pairs, {len(live)} with a live fib setup")
 
 
 def cmd_report():
@@ -200,7 +209,8 @@ def cmd_robust():
 
 
 CMDS = {"backtest": cmd_backtest, "update": cmd_update, "signals": cmd_signals,
-        "report": cmd_report, "serve": cmd_serve, "robust": cmd_robust}
+        "report": cmd_report, "serve": cmd_serve, "robust": cmd_robust,
+        "charts": cmd_charts}
 
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "report"
