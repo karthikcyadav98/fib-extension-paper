@@ -278,12 +278,29 @@ def resample(bars, k):
     Yahoo has no 4h interval, and 1h forex is structurally unprofitable here:
     the stop sits only ~0.1% from entry, which is the same order as the spread.
     Coarsening the bars widens the stop relative to cost.
+
+    Bars are bucketed by ABSOLUTE time, not by counting k at a time. Forex
+    closes from Friday night to Sunday night, and naive counting would fuse the
+    last Friday bars and the first Sunday bars into one fictitious bar that
+    straddles the weekend -- inventing a high/low range that never traded.
     """
-    if k <= 1:
+    if k <= 1 or not bars:
         return bars
+    step = _infer_step(bars)
+    if not step:
+        return bars
+    width = step * k
+
+    buckets = {}
+    for b in bars:
+        key = b["ts"] - (b["ts"] % width)
+        buckets.setdefault(key, []).append(b)
+
     out = []
-    for i in range(0, len(bars) - k + 1, k):
-        chunk = bars[i:i + k]
+    for key in sorted(buckets):
+        chunk = buckets[key]
+        # A partial bucket at a session edge is real data, but the final bucket
+        # may still be forming -- it is dropped below by the close_ts filter.
         out.append({
             "ts": chunk[0]["ts"],
             "open": chunk[0]["open"],
@@ -291,9 +308,22 @@ def resample(bars, k):
             "low": min(b["low"] for b in chunk),
             "close": chunk[-1]["close"],
             "volume": sum(b["volume"] for b in chunk),
-            "close_ts": chunk[-1]["close_ts"],
+            "close_ts": key + width - 1,
         })
-    return out
+    now_ms = time.time() * 1000
+    return [b for b in out if b["close_ts"] <= now_ms]
+
+
+def _infer_step(bars):
+    """Modal spacing between consecutive bars, robust to session gaps."""
+    if len(bars) < 3:
+        return 0
+    gaps = {}
+    for i in range(1, min(len(bars), 300)):
+        g = bars[i]["ts"] - bars[i - 1]["ts"]
+        if g > 0:
+            gaps[g] = gaps.get(g, 0) + 1
+    return max(gaps, key=gaps.get) if gaps else 0
 
 
 def fetch(instrument, ttl=300):

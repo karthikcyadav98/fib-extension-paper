@@ -23,8 +23,33 @@ STATE_PATH = os.path.join(STATE_DIR, "portfolio.json")
 
 START_EQUITY = 1000.0
 RISK_PCT = 0.01          # 1% of equity risked per trade
-MAX_POSITIONS = 6
+MAX_POSITIONS = 8
 MAX_NOTIONAL_PCT = 0.35  # cap any single position's notional
+MAX_CCY_EXPOSURE = 3     # net open positions exposed to any one currency
+
+def _exposure(positions):
+    """Net directional exposure per currency across open positions.
+
+    Long EURUSD is long EUR and short USD. Without this, a trend-following book
+    can hold six USD-quoted longs and believe it has six positions when it has
+    one leveraged USD short -- the single most common way an FX book dies.
+    """
+    net = {}
+    for p in positions:
+        if not p.get("base"):
+            continue
+        d = 1 if p["side"] == "long" else -1
+        net[p["base"]] = net.get(p["base"], 0) + d
+        net[p["quote"]] = net.get(p["quote"], 0) - d
+    return net
+
+
+def _would_breach(positions, inst, side):
+    d = 1 if side == "long" else -1
+    net = _exposure(positions)
+    net[inst["base"]] = net.get(inst["base"], 0) + d
+    net[inst["quote"]] = net.get(inst["quote"], 0) - d
+    return any(abs(v) > MAX_CCY_EXPOSURE for v in net.values())
 
 
 def new_state():
@@ -75,6 +100,8 @@ def _open_position(state, inst, sig):
         "id": f"{inst['id']}-{sig['close_ts']}",
         "symbol": inst["id"],
         "market": inst["market"],
+        "base": inst.get("base"),
+        "quote": inst.get("quote"),
         "side": sig["side"],
         "qty": qty,
         "qty_open": qty,
@@ -208,6 +235,8 @@ def update(state=None, ttl=120, verbose=True):
             # close, so the same bar must not also advance the new position.
             sig = sig_by_ts.get(b["ts"])
             if not sig or len(state["positions"]) >= MAX_POSITIONS:
+                continue
+            if inst.get("base") and _would_breach(state["positions"], inst, sig["side"]):
                 continue
             newpos = _open_position(state, inst, sig)
             newpos["status"] = "open"

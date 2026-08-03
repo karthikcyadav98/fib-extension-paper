@@ -1,10 +1,13 @@
-# Trend-Based Fibonacci Extension — mechanised, backtested, paper-traded
+# Trend-Based Fibonacci Extension — live forex paper trading
 
-A full implementation of the "trend-based fib extension" strategy across three
-markets (Indian equities, forex, crypto), with free keyless data, a historical
-test, a parameter sweep, a live $1,000 paper account and a web dashboard.
+A mechanised implementation of the "trend-based fib extension" strategy, now
+running **forex-only across 16 pairs on 4h bars**, with free keyless data, a
+historical test, an out-of-sample research harness, a live $1,000 paper account
+and a web dashboard. Hosted on GitHub Actions; the dashboard is on Pages.
 
-**Headline result: it does not have an edge.** Details in *Findings* below.
+**Headline result: it does not have an edge.** On 16 pairs it measures
+-0.07R per trade at a 33.8% win rate (PF 0.88). Every time the sample was
+widened, the apparent edge shrank — see *Findings*.
 
 ## Quick start
 
@@ -45,16 +48,17 @@ Pivots need `pivot_right` bars of confirmation, and each is used only from its
 
 ## Data (free, keyless)
 
-| Market | Source | Timeframe | Why |
-|---|---|---|---|
-| forex — EURUSD, GBPUSD, USDJPY, AUDUSD | Yahoo chart API | 1h | deepest liquidity, 24/5, cleanest swings |
-| crypto — BTC, ETH, SOL, BNB | Binance public REST | 4h | strongest trends, but wicks need a slower TF |
-| india — NIFTY, RELIANCE, HDFCBANK, INFY, TCS | Yahoo chart API | 1d | overnight gaps destroy intraday swing structure |
+**16 forex pairs on 4h bars**, resampled from Yahoo's 1h feed (Yahoo has no
+native 4h): 7 majors (EURUSD GBPUSD USDJPY AUDUSD USDCHF USDCAD NZDUSD) and
+9 crosses (EURGBP EURJPY EURCHF EURAUD AUDJPY CADJPY GBPJPY CHFJPY GBPAUD).
+Crypto and India remain in `universe.REFERENCE` for comparison only.
 
-Two gotchas worth knowing, both already handled in `fibx/data.py`:
-Yahoo **429s a full Chrome user-agent string** but serves a short one, and
-python.org Python ships **no CA bundle**, so the SSL context falls back to
-certifi or the macOS system bundle.
+Three gotchas, all handled in `fibx/data.py`:
+Yahoo **429s a full Chrome user-agent** but serves a short one; python.org
+Python ships **no CA bundle** (falls back to certifi or the macOS bundle); and
+resampling **buckets by absolute time, not by counting bars** — counting would
+fuse Friday and Sunday bars across the weekend close into one bar whose
+high/low range never traded.
 
 ## Cost model
 
@@ -77,18 +81,26 @@ scale-out beat it in 51 of 72 cells — but that is the *scale-out-and-trail*
 mechanic, not the numbers 1.272 and 1.618. Any comparable pair of targets would
 likely do the same.
 
-**3. Ranking by market, on the best-of-sweep config:**
+**3. Widening the sample destroys every apparent edge.** This happened three
+times, in the same direction each time:
 
-| Market | Trades | Win rate | Avg R | PF |
-|---|---|---|---|---|
-| crypto | 152 | 34.9% | +0.18 | 1.29 |
-| forex | 405 | 32.8% | −0.05 | 0.92 |
-| india | 29 | 34.5% | −0.20 | 0.65 |
+| Sample | Trades | Avg R |
+|---|---|---|
+| crypto, 4 pairs | 152 | **+0.18** |
+| crypto, 10 pairs | 384 | **+0.01** |
+| forex 4h, 4 pairs | 97 | **+0.006** |
+| forex 4h, 16 pairs | 355 | **−0.07** |
 
-Crypto is the only market that is positive, and it is the one with the smallest
-sample. With ~150 trades and a per-trade standard deviation near 1.3R, the
-standard error on that +0.18R is about ±0.11R — so it is roughly 1.6 standard
-errors from zero. Suggestive, not significant, and selected after the fact.
+A strategy with a real edge does not behave this way. This is what a
+zero-edge process looks like when you keep drawing from it.
+
+**3b. Out-of-sample variant testing found nothing.** `research.py` evaluates 12
+hypothesis-driven variants (regime filters, retracement caps, exit models, R:R
+floors) on a 70/30 time split. **None cleared 2 standard errors out of sample.**
+The train winner (+0.559R) collapsed to +0.180 ±0.393 on 21 test trades. The
+best-looking filter turned out to be nothing but "don't trade 1h forex".
+A session-of-day effect (Asia +0.147R) decayed from +0.264R to +0.029R across
+a split-half test — noise, not signal.
 
 **4. The live config is optimistic by construction.** `strategy.DEFAULTS` is the
 best cell of the sweep — chosen *after* seeing results. Live performance should
@@ -99,8 +111,14 @@ be expected to fall short of the backtest, not match it.
 `run.py update` is idempotent per bar: every symbol stores the timestamp of the
 last bar it processed, so running it twice in a minute cannot double-trade. The
 first run adopts history without back-filling imaginary trades, so the test
-starts genuinely flat. $1,000 start, 1% equity risked per trade, max 6 concurrent
+starts genuinely flat. $1,000 start, 1% equity risked per trade, max 8 concurrent
 positions, 35% notional cap per position.
+
+**Currency exposure cap.** 16 FX pairs are not 16 independent bets: six
+USD-quoted longs are one leveraged USD short. `paper.py` tracks net directional
+exposure per currency and refuses any entry that would push a single currency
+past `MAX_CCY_EXPOSURE` (3). This is the risk control an FX book actually needs;
+position count alone does not provide it.
 
 **On missed runs.** The hourly cron does not fire while the machine is asleep and
 macOS never replays skipped jobs, so bars pile up between updates. `update`
@@ -118,6 +136,8 @@ fibx/indicators.py   EMA, Wilder ATR, fractal pivots
 fibx/strategy.py     anchor selection + signal generation
 fibx/backtest.py     fill simulation, portfolio compounding, stats
 fibx/robustness.py   parameter sweep
+fibx/diagnose.py     trade decomposition by side/exit/regime/volatility
+fibx/research.py     out-of-sample variant testing on a 70/30 time split
 fibx/paper.py        live $1,000 paper broker
 fibx/server.py       stdlib dashboard server
 web/index.html       dashboard
