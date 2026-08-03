@@ -4,7 +4,7 @@
   "realised_pnl": 0.0,
   "risk_pct": 0.01,
   "started_at": 1785751433522,
-  "last_update": 1785797125475,
+  "last_update": 1785801053420,
   "positions": [],
   "closed": [],
   "equity_curve": [
@@ -55,6 +55,11 @@
     },
     {
       "ts": 1785797125475,
+      "equity": 1000.0,
+      "equity_mtm": 1000.0
+    },
+    {
+      "ts": 1785801053420,
       "equity": 1000.0,
       "equity_mtm": 1000.0
     }
