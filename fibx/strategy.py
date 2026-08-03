@@ -49,6 +49,7 @@ DEFAULTS = {
     "min_trend_str": 0.0,   # EMA50-200 gap / price -- 0 disables the regime filter
     "min_atr_pct": 0.0,     # ATR / price -- screens out dead, chopping markets
     "single_target": False, # True = exit all at T1, no runner to T2
+    "min_risk_atr": 0.5,    # stop must be >= this many ATR from entry
     "max_bars_in_trade": 60,
 }
 
@@ -177,6 +178,11 @@ def scan(bars, cfg=None, first_idx=0):
                 reward = entry - t1
 
             if risk <= 0 or reward <= 0 or reward / risk < cfg["min_rr"]:
+                continue
+            # A stop that sits a few basis points from entry produces an absurd
+            # R:R, sails through min_rr, sizes the position enormously and is
+            # then taken out by noise. Require real separation.
+            if risk < cfg["min_risk_atr"] * a[t]:
                 continue
             if abs(ef[t] - es[t]) / closes[t] < cfg["min_trend_str"]:
                 continue
