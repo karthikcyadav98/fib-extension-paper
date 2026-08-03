@@ -272,8 +272,37 @@ def fetch_kraken(pair, interval="4h", ttl=300):
     return _cached(f"kraken_{pair}_{interval}", ttl, go)
 
 
+def resample(bars, k):
+    """Aggregate k consecutive bars into one (1h -> 4h at k=4).
+
+    Yahoo has no 4h interval, and 1h forex is structurally unprofitable here:
+    the stop sits only ~0.1% from entry, which is the same order as the spread.
+    Coarsening the bars widens the stop relative to cost.
+    """
+    if k <= 1:
+        return bars
+    out = []
+    for i in range(0, len(bars) - k + 1, k):
+        chunk = bars[i:i + k]
+        out.append({
+            "ts": chunk[0]["ts"],
+            "open": chunk[0]["open"],
+            "high": max(b["high"] for b in chunk),
+            "low": min(b["low"] for b in chunk),
+            "close": chunk[-1]["close"],
+            "volume": sum(b["volume"] for b in chunk),
+            "close_ts": chunk[-1]["close_ts"],
+        })
+    return out
+
+
 def fetch(instrument, ttl=300):
     """Dispatch on an instrument spec from universe.py, with failover."""
+    bars = _fetch_raw(instrument, ttl)
+    return resample(bars, instrument.get("resample", 1))
+
+
+def _fetch_raw(instrument, ttl=300):
     src = instrument["source"]
     if src == "yahoo":
         return fetch_yahoo(instrument["symbol"], instrument["interval"], instrument.get("range", "2y"), ttl)

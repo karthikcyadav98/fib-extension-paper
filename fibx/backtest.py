@@ -47,6 +47,8 @@ def simulate_symbol(bars, signals, cfg, cost_bps, mode="fib"):
 
         if mode == "r2":
             targets = [(entry + 2 * risk if side == "long" else entry - 2 * risk, 1.0)]
+        elif cfg.get("single_target"):
+            targets = [(sig["t1"], 1.0)]
         else:
             targets = [(sig["t1"], 0.5), (sig["t2"], 0.5)]
 

@@ -46,6 +46,9 @@ DEFAULTS = {
     "entry_window": 10,    # bars after P3 confirmation to still accept a trigger
     "min_rr": 2.0,         # reward:risk to T1
     "allow_short": True,
+    "min_trend_str": 0.0,   # EMA50-200 gap / price -- 0 disables the regime filter
+    "min_atr_pct": 0.0,     # ATR / price -- screens out dead, chopping markets
+    "single_target": False, # True = exit all at T1, no runner to T2
     "max_bars_in_trade": 60,
 }
 
@@ -175,6 +178,10 @@ def scan(bars, cfg=None, first_idx=0):
 
             if risk <= 0 or reward <= 0 or reward / risk < cfg["min_rr"]:
                 continue
+            if abs(ef[t] - es[t]) / closes[t] < cfg["min_trend_str"]:
+                continue
+            if a[t] / closes[t] < cfg["min_atr_pct"]:
+                continue
 
             used.add((side, p3["idx"]))
             signals.append(
@@ -192,6 +199,13 @@ def scan(bars, cfg=None, first_idx=0):
                     "rr_t2": (abs(t2 - entry)) / risk,
                     "retrace": retr,
                     "atr": a[t],
+                    # context for diagnostics: how strong the trend is, how
+                    # volatile the instrument is, and how far price ran from the
+                    # pullback low before the trigger fired (entry lateness).
+                    "trend_str": abs(ef[t] - es[t]) / closes[t],
+                    "atr_pct": a[t] / closes[t],
+                    "entry_ext": abs(entry - p3["price"]) / leg,
+                    "leg_pct": leg / closes[t],
                     "p1": {"idx": p1["idx"], "price": p1["price"], "ts": bars[p1["idx"]]["ts"]},
                     "p2": {"idx": p2["idx"], "price": p2["price"], "ts": bars[p2["idx"]]["ts"]},
                     "p3": {"idx": p3["idx"], "price": p3["price"], "ts": bars[p3["idx"]]["ts"]},
