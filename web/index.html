@@ -385,7 +385,16 @@ function drawCandles() {
             height="${Math.max(1, Math.abs(yC - yO)).toFixed(1)}" fill="${col}"/>`;
   }).join("");
 
-  let overlay = "", caption = `${PAIR} · 4h · last ${d.last.toFixed(dec)}`;
+  let overlay = "", caption = `${PAIR} · 4h`;
+  if (d.live) {
+    const age = Math.round((Date.now() - d.live.ts) / 1000);
+    const ago = age < 90 ? `${age}s` : age < 5400 ? `${Math.round(age / 60)}m` : `${Math.round(age / 3600)}h`;
+    caption += ` · LIVE ${d.live.price.toFixed(dec)} (${ago} ago)`;
+    // live price line, so the gap to the last closed bar is visible
+    overlay += `<line x1="${P.l}" x2="${W - P.r}" y1="${Y(d.live.price).toFixed(1)}" y2="${Y(d.live.price).toFixed(1)}"
+        stroke="var(--warning)" stroke-width="1" stroke-dasharray="2 3" opacity="0.9"/>`;
+  }
+  caption += ` · bar close ${d.last.toFixed(dec)}`;
   if (geo) {
     const lvl = (v, col, label, dash) => `
       <line x1="${P.l}" x2="${W - P.r}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}"
@@ -426,6 +435,7 @@ function drawCandles() {
     <span><i style="background:var(--text-secondary)"></i>entry</span>
     <span><i style="background:var(--critical)"></i>stop</span>
     <span><i style="background:var(--series-1)"></i>1.272 / 1.618 targets</span>
+    <span><i style="background:var(--warning);height:0;border-top:2px dashed var(--warning)"></i>live price</span>
     <span>&bull; = pair has a live setup</span>
   </div>`;
   $("#candle-cap").textContent = caption;

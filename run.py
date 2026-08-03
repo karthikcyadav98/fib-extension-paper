@@ -36,7 +36,7 @@ def cmd_backtest():
 
     for inst in universe.UNIVERSE:
         try:
-            bars = data.fetch(inst, ttl=3600)
+            bars = data.fetch_history(inst)
         except Exception as e:
             print(f"  ! {inst['id']:<10} {e}")
             continue

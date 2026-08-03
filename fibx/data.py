@@ -327,9 +327,34 @@ def _infer_step(bars):
 
 
 def fetch(instrument, ttl=300):
-    """Dispatch on an instrument spec from universe.py, with failover."""
+    """LIVE bars for trading -- freshest source available for this instrument."""
+    if instrument.get("source") == "deriv":
+        from . import deriv
+
+        def go():
+            return deriv.candles(instrument["symbol"], instrument.get("interval", "4h"), 2000)
+
+        return _cached(f"deriv_{instrument['symbol']}_{instrument.get('interval','4h')}", ttl, go)
     bars = _fetch_raw(instrument, ttl)
     return resample(bars, instrument.get("resample", 1))
+
+
+def fetch_history(instrument, ttl=999999):
+    """DEEP bars for backtesting.
+
+    Deriv stops at ~258 days, which is plenty to trade on but thin for measuring
+    a strategy, so anything declaring hist_* is backtested on that deeper feed
+    instead. Same bar geometry (4h), different provider.
+    """
+    if not instrument.get("hist_source"):
+        return fetch(instrument, ttl)
+    spec = dict(instrument)
+    spec["source"] = instrument["hist_source"]
+    spec["symbol"] = instrument["hist_symbol"]
+    spec["interval"] = instrument.get("hist_interval", instrument.get("interval"))
+    spec["range"] = instrument.get("hist_range", "730d")
+    bars = _fetch_raw(spec, ttl)
+    return resample(bars, instrument.get("hist_resample", 1))
 
 
 def _fetch_raw(instrument, ttl=300):

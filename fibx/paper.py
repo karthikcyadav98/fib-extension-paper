@@ -305,9 +305,20 @@ def build_charts(bars_back=140, ttl=120):
                 "traded": inst["id"] in open_by,
             }
 
+        # Real current price, seconds old -- distinct from the last CLOSED bar,
+        # which on a 4h chart can be hours behind.
+        live = None
+        if inst.get("source") == "deriv":
+            try:
+                from . import deriv
+                live = deriv.tick(inst["symbol"])
+            except Exception:
+                live = None
+
         pos = open_by.get(inst["id"])
         out[inst["id"]] = {
             "interval": "4h",
+            "live": live,
             "last": window[-1]["close"],
             "last_ts": window[-1]["close_ts"],
             # compact: [ts, o, h, l, c] -- keeps the payload small enough to

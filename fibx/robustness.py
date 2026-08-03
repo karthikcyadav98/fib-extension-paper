@@ -26,7 +26,7 @@ def sweep(instruments=None, verbose=True):
     loaded = []
     for inst in instruments:
         try:
-            loaded.append((inst, data.fetch(inst, ttl=999999)))
+            loaded.append((inst, data.fetch_history(inst)))
         except Exception as e:
             if verbose:
                 print(f"  ! {inst['id']}: {e}")

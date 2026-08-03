@@ -17,7 +17,7 @@ def collect(cfg=None, instruments=None, verbose=True):
     out = []
     for inst in instruments:
         try:
-            bars = data.fetch(inst, ttl=999999)
+            bars = data.fetch_history(inst)
         except Exception as e:
             if verbose:
                 print(f"  ! {inst['id']}: {e}")

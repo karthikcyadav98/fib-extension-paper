@@ -41,9 +41,16 @@ FOREX = [
     {"id": "GBPAUD", "base": "GBP", "quote": "AUD", "cost_bps": 2.2},
 ]
 
+# LIVE data comes from Deriv: real broker 4h candles + live ticks, no API key,
+# and it serves Indian residents (OANDA does not). Deriv only goes back ~258
+# days, so the deep backtest still reads Yahoo 1h resampled to 4h -- declared
+# per instrument as hist_*. Live and historical therefore differ in source,
+# which is a deliberate trade-off: freshness where it is traded, depth where it
+# is measured.
 UNIVERSE = [
-    dict(market="forex", source="yahoo", symbol=f"{f['id']}=X",
-         interval="1h", range="730d", resample=4, **f)
+    dict(market="forex", source="deriv", symbol=f["id"], interval="4h",
+         hist_source="yahoo", hist_symbol=f"{f['id']}=X",
+         hist_interval="1h", hist_range="730d", hist_resample=4, **f)
     for f in FOREX
 ]
 
