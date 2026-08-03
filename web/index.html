@@ -122,6 +122,7 @@
   <header>
     <h1>Trend-Based Fibonacci Extension</h1>
     <div class="controls">
+      <span id="live" style="font-size:12px;color:var(--text-secondary);font-weight:600">&#9679; connecting</span>
       <span id="stamp" style="font-size:12px;color:var(--text-muted)"></span>
       <button id="theme">Theme</button>
       <button id="reload">Refresh</button>
@@ -254,6 +255,7 @@ function equityChart(points) {
 }
 
 function renderPortfolio(s) {
+  PORTFOLIO = s;
   const eq = s.equity_mtm ?? s.equity, pnl = eq - s.start_equity;
   const closed = s.closed || [], wins = closed.filter(c => c.realised > 0);
   const days = s.last_update ? (s.last_update - s.started_at) / 86400000 : 0;
@@ -264,8 +266,9 @@ function renderPortfolio(s) {
     [`Day`, days.toFixed(1) + " / 7", `${(s.positions || []).length} open · ${closed.length} closed`, ""],
     [`Win rate`, closed.length ? (100 * wins.length / closed.length).toFixed(0) + "%" : "—",
       closed.length ? `${wins.length}W / ${closed.length - wins.length}L` : "no trades closed yet", ""],
-  ].map(([k, v, n, c]) => `<div class="tile"><div class="k">${k}</div>
-      <div class="v ${c}">${v}</div><div class="n">${n}</div></div>`).join("");
+  ].map(([k, v, n, c], i) => `<div class="tile"><div class="k">${k}</div>
+      <div class="v ${c}"${i === 0 ? ' id="tile-equity"' : i === 1 ? ' id="tile-pnl"' : ""}>${v}</div>
+      <div class="n"${i === 1 ? ' id="tile-pnl-note"' : ""}>${n}</div></div>`).join("");
 
   equityChart(s.equity_curve || []);
 
@@ -331,8 +334,107 @@ function renderFills(positions) {
     "No fills yet. Each entry, scale-out and stop will appear here as it happens.");
 }
 
+// ---- real-time feed, straight from the browser to Deriv ----
+//
+// The committed JSON only refreshes when the hourly workflow runs, so on its own
+// the page is a snapshot. Deriv's WebSocket is public and browser-reachable, so
+// the page subscribes directly: ticks for every pair, plus streaming candles for
+// whichever pair is on screen. The static file still supplies everything the
+// browser cannot compute -- fib geometry, positions, realised P&L -- and is the
+// fallback if the socket fails.
+const DERIV_WS = "wss://ws.derivws.com/websockets/v3?app_id=1";
+const LIVE = { ticks: {}, candles: {}, status: "connecting" };
+let ws = null, redrawQueued = false, reconnectDelay = 2000;
+
+function setStatus(s) {
+  LIVE.status = s;
+  const el = $("#live");
+  if (!el) return;
+  const map = { live: ["var(--good)", "LIVE"], connecting: ["var(--warning)", "connecting"],
+                reconnecting: ["var(--warning)", "reconnecting"], offline: ["var(--critical)", "offline"] };
+  const [c, t] = map[s] || map.offline;
+  el.innerHTML = `<span style="color:${c}">&#9679;</span> ${t}`;
+}
+
+function queueRedraw() {
+  if (redrawQueued) return;
+  redrawQueued = true;
+  setTimeout(() => { redrawQueued = false; if (CHARTS) { drawCandles(); renderPairbar(); } markToLive(); }, 400);
+}
+
+function subscribeCandles() {
+  if (!ws || ws.readyState !== 1 || !PAIR) return;
+  ws.send(JSON.stringify({ forget_all: "candles" }));
+  ws.send(JSON.stringify({ ticks_history: "frx" + PAIR, style: "candles",
+                           granularity: 14400, count: 140, end: "latest", subscribe: 1 }));
+}
+
+function connectLive() {
+  try { ws = new WebSocket(DERIV_WS); } catch (e) { setStatus("offline"); return; }
+  setStatus("connecting");
+
+  ws.onopen = () => {
+    setStatus("live");
+    reconnectDelay = 2000;
+    const names = CHARTS ? Object.keys(CHARTS.pairs) : [];
+    names.forEach(n => ws.send(JSON.stringify({ ticks: "frx" + n, subscribe: 1 })));
+    subscribeCandles();
+  };
+
+  ws.onmessage = ev => {
+    let d; try { d = JSON.parse(ev.data); } catch { return; }
+    if (d.tick) {
+      LIVE.ticks[d.tick.symbol.replace("frx", "")] = { price: +d.tick.quote, ts: d.tick.epoch * 1000 };
+      queueRedraw();
+    } else if (d.candles && d.echo_req) {
+      const sym = (d.echo_req.ticks_history || "").replace("frx", "");
+      LIVE.candles[sym] = d.candles.map(c => [c.epoch * 1000, +c.open, +c.high, +c.low, +c.close]);
+      queueRedraw();
+    } else if (d.ohlc) {
+      // streaming update for the candle currently forming
+      const sym = d.ohlc.symbol.replace("frx", "");
+      const arr = LIVE.candles[sym];
+      if (arr) {
+        const row = [d.ohlc.open_time * 1000, +d.ohlc.open, +d.ohlc.high, +d.ohlc.low, +d.ohlc.close];
+        if (arr.length && arr[arr.length - 1][0] === row[0]) arr[arr.length - 1] = row;
+        else arr.push(row);
+        queueRedraw();
+      }
+    }
+  };
+
+  ws.onclose = () => {
+    setStatus("reconnecting");
+    setTimeout(connectLive, reconnectDelay);
+    reconnectDelay = Math.min(reconnectDelay * 2, 30000);   // back off, don't hammer
+  };
+  ws.onerror = () => { try { ws.close(); } catch (e) {} };
+}
+
+// Re-price open positions against the streaming tick, so unrealised P&L moves
+// in real time instead of freezing until the next workflow run.
+function markToLive() {
+  if (!PORTFOLIO) return;
+  const pos = PORTFOLIO.positions || [];
+  if (!pos.length) return;
+  let unreal = 0, any = false;
+  for (const p of pos) {
+    const t = LIVE.ticks[p.symbol];
+    const px = t ? t.price : p.last_price;
+    if (t) any = true;
+    unreal += (p.side === "long" ? px - p.entry : p.entry - px) * p.qty_open;
+  }
+  if (!any) return;
+  const eq = PORTFOLIO.equity + unreal, pnl = eq - PORTFOLIO.start_equity;
+  const set = (sel, txt, cl) => { const e = $(sel); if (e) { e.textContent = txt; e.className = "v " + cl; } };
+  set("#tile-equity", money(eq), cls(pnl));
+  set("#tile-pnl", sgn(pnl), cls(pnl));
+  const n = $("#tile-pnl-note");
+  if (n) n.textContent = `realised ${sgn(PORTFOLIO.realised_pnl || 0)} · open ${sgn(unreal)}`;
+}
+
 // ---- candlestick chart with the strategy's own fib geometry ----
-let CHARTS = null, PAIR = null;
+let CHARTS = null, PAIR = null, PORTFOLIO = null;
 
 function renderPairbar() {
   const names = Object.keys(CHARTS.pairs);
@@ -343,19 +445,25 @@ function renderPairbar() {
   $("#pairbar").innerHTML = names.map(n => {
     const p = CHARTS.pairs[n];
     // a dot marks a pair that currently has a fib setup on the chart
-    return `<button data-p="${n}" class="${n === PAIR ? "on" : ""}">${n}${p.setup ? ' <span class="dot">&bull;</span>' : ""}</button>`;
+    const t = LIVE.ticks[n];
+    const px = t ? ` <span style="color:var(--text-muted)">${t.price.toFixed(t.price < 5 ? 4 : 2)}</span>` : "";
+    return `<button data-p="${n}" class="${n === PAIR ? "on" : ""}">${n}${px}${p.setup ? ' <span class="dot">&bull;</span>' : ""}</button>`;
   }).join("");
   $("#pairbar").querySelectorAll("button").forEach(b =>
-    b.onclick = () => { PAIR = b.dataset.p; renderPairbar(); drawCandles(); });
+    b.onclick = () => { PAIR = b.dataset.p; renderPairbar(); drawCandles(); subscribeCandles(); });
 }
 
 function drawCandles() {
   const d = CHARTS.pairs[PAIR];
-  const bars = d.bars, W = 980, H = 420, P = { t: 16, r: 74, b: 30, l: 8 };
+  const streaming = LIVE.candles[PAIR];
+  const bars = (streaming && streaming.length > 30) ? streaming : d.bars;
+  const W = 980, H = 420, P = { t: 16, r: 74, b: 30, l: 8 };
   const geo = d.position || d.setup;
 
   let lo = Math.min(...bars.map(b => b[3])), hi = Math.max(...bars.map(b => b[2]));
   if (geo) { lo = Math.min(lo, geo.stop, geo.t2); hi = Math.max(hi, geo.stop, geo.t2); }
+  const lt = LIVE.ticks[PAIR] || d.live;
+  if (lt) { lo = Math.min(lo, lt.price); hi = Math.max(hi, lt.price); }
   const pad = (hi - lo) * 0.06 || 1; lo -= pad; hi += pad;
 
   const n = bars.length;
@@ -386,12 +494,13 @@ function drawCandles() {
   }).join("");
 
   let overlay = "", caption = `${PAIR} · 4h`;
-  if (d.live) {
-    const age = Math.round((Date.now() - d.live.ts) / 1000);
+  const liveTick = LIVE.ticks[PAIR] || d.live;
+  if (liveTick) {
+    const age = Math.round((Date.now() - liveTick.ts) / 1000);
     const ago = age < 90 ? `${age}s` : age < 5400 ? `${Math.round(age / 60)}m` : `${Math.round(age / 3600)}h`;
-    caption += ` · LIVE ${d.live.price.toFixed(dec)} (${ago} ago)`;
+    caption += ` · LIVE ${liveTick.price.toFixed(dec)} (${ago} ago)`;
     // live price line, so the gap to the last closed bar is visible
-    overlay += `<line x1="${P.l}" x2="${W - P.r}" y1="${Y(d.live.price).toFixed(1)}" y2="${Y(d.live.price).toFixed(1)}"
+    overlay += `<line x1="${P.l}" x2="${W - P.r}" y1="${Y(liveTick.price).toFixed(1)}" y2="${Y(liveTick.price).toFixed(1)}"
         stroke="var(--warning)" stroke-width="1" stroke-dasharray="2 3" opacity="0.9"/>`;
   }
   caption += ` · bar close ${d.last.toFixed(dec)}`;
@@ -449,6 +558,7 @@ function renderCharts(c) {
   }
   renderPairbar();
   drawCandles();
+  if (!ws) connectLive();
 }
 
 function renderSignals(d) {

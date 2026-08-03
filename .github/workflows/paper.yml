@@ -2,15 +2,17 @@ name: paper-trade
 
 # Hourly advance of the $1,000 paper account, then publish the dashboard.
 #
-# GitHub's scheduled runs are best-effort and are routinely delayed by 10-60
-# minutes at peak. That is fine here: `run.py update` replays every bar that
-# printed since the last run, so a late or skipped run costs nothing but
-# freshness. Crypto fails over to Kraken because Binance returns 451 to the
+# GitHub's scheduled runs are best-effort and are routinely delayed. That is fine
+# here: `run.py update` replays every bar that printed since the last run, so a
+# late or skipped run costs nothing but freshness. Note the dashboard no longer
+# depends on this cadence for PRICES -- the browser streams ticks and candles
+# straight from Deriv. This job exists to execute paper trades and persist P&L,
+# which must happen server-side whether or not anyone has the page open. Crypto fails over to Kraken because Binance returns 451 to the
 # US-based runners.
 
 on:
   schedule:
-    - cron: "17 * * * *"   # off the hour: :00 is the most contended slot
+    - cron: "7,22,37,52 * * * *"   # 4x/hour, off the :00 slot which is contended
   workflow_dispatch:        # lets you (or me) trigger a run on demand
   push:
     branches: [main]

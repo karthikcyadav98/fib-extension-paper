@@ -106,16 +106,24 @@ a split-half test — noise, not signal.
 best cell of the sweep — chosen *after* seeing results. Live performance should
 be expected to fall short of the backtest, not match it.
 
-## Data latency — read this before calling it "live"
+## How "live" it actually is
 
-Bars come from Yahoo's 1h feed, resampled to 4h, and the runner fires hourly.
-**A just-closed bar is therefore up to ~55 minutes old**, and a 4h bar only
-finalises every 4 hours. That is fine for a 4h strategy — no signal is missed,
-because `update` replays every bar since the last run — but it is *hourly batch*,
-not streaming, and the dashboard timestamp reflects that.
+Two independent paths, deliberately:
 
-For true streaming prices and real demo-account order execution, the system
-needs an **OANDA practice API token** (free). See `LIVE.md`.
+| | Source | Freshness |
+|---|---|---|
+| **Dashboard prices & candles** | browser → Deriv WebSocket | **streaming, ~1s** |
+| **Trade execution & P&L** | GitHub Actions → Deriv REST | every ~15 min |
+| **Backtest history** | Yahoo 1h → 4h | static |
+
+The page subscribes directly to Deriv from your browser, so prices, candles and
+unrealised P&L update in real time regardless of when the workflow last ran. The
+workflow exists to *execute* paper trades and persist state, which has to happen
+server-side whether or not anyone has the page open.
+
+Fills are still simulated internally. Real broker execution is not available:
+OANDA and FXCM refuse Indian residents, and Deriv's trading API sells contracts
+rather than spot FX with stop/target. See `LIVE.md`.
 
 ## Live paper account
 
