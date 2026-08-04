@@ -29,6 +29,9 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
+    # A hung data fetch must never wedge the queue: runs are serialised by the
+    # concurrency group, so one stuck job blocks every later one.
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
 
