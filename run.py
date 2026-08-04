@@ -139,8 +139,12 @@ def cmd_charts():
     """OHLC + live fib geometry for the dashboard's candlestick view."""
     charts = paper.build_charts()
     _write("charts.json", charts)
-    live = [k for k, v in charts["pairs"].items() if v["setup"]]
-    print(f"  charts: {len(charts['pairs'])} pairs, {len(live)} with a live fib setup")
+    setups = [(k, v["setup"]) for k, v in charts["pairs"].items() if v["setup"]]
+    active = [k for k, s in setups if s["status"] == "active"]
+    print(f"  charts: {len(charts['pairs'])} pairs | {len(active)} ACTIVE setup(s), "
+          f"{len(setups) - len(active)} dead (stop broken / target hit / expired)")
+    for k, st in setups:
+        print(f"    {k:<8} {st['side']:<6} {st['status']:<15} {st['bars_since']:>3} bars ago")
 
 
 def cmd_report():

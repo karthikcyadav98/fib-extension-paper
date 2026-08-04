@@ -447,7 +447,8 @@ function renderPairbar() {
     // a dot marks a pair that currently has a fib setup on the chart
     const t = LIVE.ticks[n];
     const px = t ? ` <span style="color:var(--text-muted)">${t.price.toFixed(t.price < 5 ? 4 : 2)}</span>` : "";
-    return `<button data-p="${n}" class="${n === PAIR ? "on" : ""}">${n}${px}${p.setup ? ' <span class="dot">&bull;</span>' : ""}</button>`;
+    const active = p.setup && p.setup.status === "active";
+    return `<button data-p="${n}" class="${n === PAIR ? "on" : ""}">${n}${px}${active ? ' <span class="dot">&bull;</span>' : ""}</button>`;
   }).join("");
   $("#pairbar").querySelectorAll("button").forEach(b =>
     b.onclick = () => { PAIR = b.dataset.p; renderPairbar(); drawCandles(); subscribeCandles(); });
@@ -505,10 +506,12 @@ function drawCandles() {
   }
   caption += ` · bar close ${d.last.toFixed(dec)}`;
   if (geo) {
+    const dead = d.setup && d.setup.status !== "active" && !d.position;
+    const fade = dead ? ' opacity="0.32"' : "";
     const lvl = (v, col, label, dash) => `
       <line x1="${P.l}" x2="${W - P.r}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}"
-            stroke="${col}" stroke-width="1.5" ${dash ? 'stroke-dasharray="5 4"' : ""}/>
-      <text x="${P.l + 4}" y="${(Y(v) - 5).toFixed(1)}" fill="${col}" font-size="11" font-weight="600">${label}</text>`;
+            stroke="${col}" stroke-width="1.5"${fade} ${dash ? 'stroke-dasharray="5 4"' : ""}/>
+      <text x="${P.l + 4}" y="${(Y(v) - 5).toFixed(1)}" fill="${col}" font-size="11" font-weight="600"${fade}>${label}</text>`;
     overlay += lvl(geo.stop, "var(--critical)", `stop ${geo.stop.toFixed(dec)}`, true);
     overlay += lvl(geo.entry, "var(--text-secondary)", `entry ${geo.entry.toFixed(dec)}`, false);
     overlay += lvl(geo.t1, "var(--series-1)", `T1 · 1.272 ${geo.t1.toFixed(dec)}`, true);
@@ -518,14 +521,17 @@ function drawCandles() {
     if (s) { // the P1->P2->P3 impulse-and-pullback the algorithm anchored on
       const pts = [s.p1, s.p2, s.p3];
       overlay += `<polyline points="${pts.map(p => `${tsX(p.ts).toFixed(1)},${Y(p.price).toFixed(1)}`).join(" ")}"
-                    fill="none" stroke="var(--warning)" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+                    fill="none" stroke="var(--warning)" stroke-width="1.5" stroke-dasharray="3 3"${fade}/>`;
       overlay += pts.map((p, i) => `
         <circle cx="${tsX(p.ts).toFixed(1)}" cy="${Y(p.price).toFixed(1)}" r="4.5"
                 fill="var(--warning)" stroke="var(--surface-1)" stroke-width="2"/>
         <text x="${tsX(p.ts).toFixed(1)}" y="${(Y(p.price) - 11).toFixed(1)}" fill="var(--warning)"
               font-size="11" font-weight="700" text-anchor="middle">P${i + 1}</text>`).join("");
-      caption += ` · ${s.side.toUpperCase()} setup, retrace ${(100 * s.retrace).toFixed(0)}%, R:R ${s.rr.toFixed(2)}`;
-      caption += s.traded ? " · position open" : " · not traded (fired before this bar)";
+      const badge = { active: "ACTIVE", invalidated: "DEAD — price broke the stop",
+                      "target reached": "DEAD — target already hit", expired: "DEAD — expired" };
+      caption += ` · ${s.side.toUpperCase()} setup ${s.bars_since} bars ago, retrace ${(100 * s.retrace).toFixed(0)}%, R:R ${s.rr.toFixed(2)}`;
+      caption += ` · ${badge[s.status] || s.status}`;
+      if (s.traded) caption += " · position open";
     }
     if (d.position) caption += ` · OPEN ${d.position.side}${d.position.scaled_t1 ? ", half off at T1" : ""}`;
   } else {

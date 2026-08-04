@@ -294,7 +294,25 @@ def build_charts(bars_back=140, ttl=120):
 
         setup = None
         if sig:
+            # A setup is only actionable while price has neither breached the
+            # stop nor reached the target. Drawing an invalidated setup as if it
+            # were live -- a long whose stop broke days ago -- is misleading.
+            after = [b for b in bars if b["ts"] > sig["ts"]]
+            status, status_ts = "active", None
+            for b in after:
+                if (b["low"] <= sig["stop"]) if sig["side"] == "long" else (b["high"] >= sig["stop"]):
+                    status, status_ts = "invalidated", b["ts"]
+                    break
+                if (b["high"] >= sig["t2"]) if sig["side"] == "long" else (b["low"] <= sig["t2"]):
+                    status, status_ts = "target reached", b["ts"]
+                    break
+            if status == "active" and len(after) > cfg["max_bars_in_trade"]:
+                status, status_ts = "expired", after[cfg["max_bars_in_trade"]]["ts"]
+
             setup = {
+                "status": status,
+                "status_ts": status_ts,
+                "bars_since": len(after),
                 "side": sig["side"], "ts": sig["ts"],
                 "entry": sig["entry"], "stop": sig["stop"],
                 "t1": sig["t1"], "t2": sig["t2"],

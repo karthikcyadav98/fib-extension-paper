@@ -332,7 +332,7 @@ def fetch(instrument, ttl=300):
         from . import deriv
 
         def go():
-            return deriv.candles(instrument["symbol"], instrument.get("interval", "4h"), 2000)
+            return deriv.candles(instrument["symbol"], instrument.get("interval", "4h"), 800)
 
         return _cached(f"deriv_{instrument['symbol']}_{instrument.get('interval','4h')}", ttl, go)
     bars = _fetch_raw(instrument, ttl)
