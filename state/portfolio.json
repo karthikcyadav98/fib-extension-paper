@@ -1,10 +1,10 @@
 {
   "start_equity": 1000.0,
-  "equity": 1000.0,
-  "realised_pnl": 0.0,
+  "equity": 999.1717808714118,
+  "realised_pnl": -0.8282191285882478,
   "risk_pct": 0.01,
   "started_at": 1785751433522,
-  "last_update": 1786330530591,
+  "last_update": 1786337189451,
   "positions": [
     {
       "id": "GBPUSD-1785830399999",
@@ -25,7 +25,7 @@
       "notional": 350.0,
       "opened_ts": 1785830399999,
       "opened_bar_ts": 1785816000000,
-      "bars_held": 22,
+      "bars_held": 23,
       "realised": 0.0,
       "R": 0.0,
       "scaled_t1": false,
@@ -49,7 +49,7 @@
         }
       },
       "fills": [],
-      "last_price": 1.34916,
+      "last_price": 1.34851,
       "status": "open"
     },
     {
@@ -71,7 +71,7 @@
       "notional": 350.0,
       "opened_ts": 1786103999999,
       "opened_bar_ts": 1786089600000,
-      "bars_held": 3,
+      "bars_held": 4,
       "realised": 0.0,
       "R": 0.0,
       "scaled_t1": false,
@@ -95,53 +95,7 @@
         }
       },
       "fills": [],
-      "last_price": 1.39448,
-      "status": "open"
-    },
-    {
-      "id": "GBPJPY-1786103999999",
-      "symbol": "GBPJPY",
-      "market": "forex",
-      "base": "GBP",
-      "quote": "JPY",
-      "side": "short",
-      "qty": 1.6438896413304729,
-      "qty_open": 1.6438896413304729,
-      "entry": 212.90966936,
-      "stop": 213.3750785910689,
-      "cur_stop": 213.3750785910689,
-      "t1": 200.969992,
-      "t2": 197.81654799999998,
-      "risk_per_unit": 0.42707859106889146,
-      "risk_amt": 0.7020700718921636,
-      "notional": 350.0,
-      "opened_ts": 1786103999999,
-      "opened_bar_ts": 1786089600000,
-      "bars_held": 3,
-      "realised": 0.0,
-      "R": 0.0,
-      "scaled_t1": false,
-      "retrace": 0.32806671055518755,
-      "rr_t1": 28.04637893466278,
-      "anchors": {
-        "p1": {
-          "idx": 763,
-          "price": 218.687,
-          "ts": 1785398400000
-        },
-        "p2": {
-          "idx": 773,
-          "price": 209.573,
-          "ts": 1785715200000
-        },
-        "p3": {
-          "idx": 787,
-          "price": 212.563,
-          "ts": 1785916800000
-        }
-      },
-      "fills": [],
-      "last_price": 212.887,
+      "last_price": 1.39623,
       "status": "open"
     },
     {
@@ -163,7 +117,7 @@
       "notional": 350.0,
       "opened_ts": 1786118399999,
       "opened_bar_ts": 1786104000000,
-      "bars_held": 2,
+      "bars_held": 3,
       "realised": 0.0,
       "R": 0.0,
       "scaled_t1": false,
@@ -187,11 +141,68 @@
         }
       },
       "fills": [],
-      "last_price": 195.313,
+      "last_price": 195.506,
       "status": "open"
     }
   ],
-  "closed": [],
+  "closed": [
+    {
+      "id": "GBPJPY-1786103999999",
+      "symbol": "GBPJPY",
+      "market": "forex",
+      "base": "GBP",
+      "quote": "JPY",
+      "side": "short",
+      "qty": 1.6438896413304729,
+      "qty_open": 0.0,
+      "entry": 212.90966936,
+      "stop": 213.3750785910689,
+      "cur_stop": 213.3750785910689,
+      "t1": 200.969992,
+      "t2": 197.81654799999998,
+      "risk_per_unit": 0.42707859106889146,
+      "risk_amt": 0.7020700718921636,
+      "notional": 350.0,
+      "opened_ts": 1786103999999,
+      "opened_bar_ts": 1786089600000,
+      "bars_held": 4,
+      "realised": -0.8282191285882478,
+      "R": -1.1796815755955772,
+      "scaled_t1": false,
+      "retrace": 0.32806671055518755,
+      "rr_t1": 28.04637893466278,
+      "anchors": {
+        "p1": {
+          "idx": 763,
+          "price": 218.687,
+          "ts": 1785398400000
+        },
+        "p2": {
+          "idx": 773,
+          "price": 209.573,
+          "ts": 1785715200000
+        },
+        "p3": {
+          "idx": 787,
+          "price": 212.563,
+          "ts": 1785916800000
+        }
+      },
+      "fills": [
+        {
+          "kind": "stop",
+          "ts": 1786320000000,
+          "price": 213.4134861052153,
+          "qty": 1.6438896413304729,
+          "pnl": -0.8282191285882478
+        }
+      ],
+      "last_price": 213.336,
+      "status": "closed",
+      "exit_reason": "stop",
+      "closed_ts": 1786334399999
+    }
+  ],
   "equity_curve": [
     {
       "ts": 1785751516467,
@@ -842,34 +853,40 @@
       "ts": 1786330530591,
       "equity": 1000.0,
       "equity_mtm": 1002.5578919795596
+    },
+    {
+      "ts": 1786337189451,
+      "equity": 999.1717808714118,
+      "equity_mtm": 1000.7395434991732
     }
   ],
   "last_bar": {
-    "EURUSD": 1786132800000,
-    "USDJPY": 1786132800000,
-    "GBPUSD": 1786132800000,
-    "AUDUSD": 1786132800000,
-    "USDCHF": 1786132800000,
-    "USDCAD": 1786132800000,
-    "NZDUSD": 1786132800000,
-    "EURGBP": 1786132800000,
-    "EURJPY": 1786132800000,
-    "EURCHF": 1786132800000,
-    "AUDJPY": 1786132800000,
-    "CADJPY": 1786132800000,
-    "EURAUD": 1786132800000,
-    "GBPJPY": 1786132800000,
-    "CHFJPY": 1786132800000,
-    "GBPAUD": 1786132800000
+    "EURUSD": 1786320000000,
+    "USDJPY": 1786320000000,
+    "GBPUSD": 1786320000000,
+    "AUDUSD": 1786320000000,
+    "USDCHF": 1786320000000,
+    "USDCAD": 1786320000000,
+    "NZDUSD": 1786320000000,
+    "EURGBP": 1786320000000,
+    "EURJPY": 1786320000000,
+    "EURCHF": 1786320000000,
+    "AUDJPY": 1786320000000,
+    "CADJPY": 1786320000000,
+    "EURAUD": 1786320000000,
+    "GBPJPY": 1786320000000,
+    "CHFJPY": 1786320000000,
+    "GBPAUD": 1786320000000
   },
   "signals": [],
   "errors": [],
-  "unrealised_pnl": 2.5578919795596144,
-  "equity_mtm": 1002.5578919795596,
+  "unrealised_pnl": 1.567762627761475,
+  "equity_mtm": 1000.7395434991732,
   "events": [
     "OPEN  GBPUSD long @ 1.34372 stop 1.33563 T1 1.36517 T2 1.37201",
     "OPEN  USDCAD short @ 1.40104 stop 1.40659 T1 1.38624 T2 1.38147",
     "OPEN  GBPJPY short @ 212.91 stop 213.375 T1 200.97 T2 197.817",
-    "OPEN  CHFJPY short @ 195.015 stop 196.477 T1 185.073 T2 182.203"
+    "OPEN  CHFJPY short @ 195.015 stop 196.477 T1 185.073 T2 182.203",
+    "CLOSE GBPJPY short stop R=-1.18 pnl=$-0.83"
   ]
 }
