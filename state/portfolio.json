@@ -4,7 +4,7 @@
   "realised_pnl": -3.5163884020551768,
   "risk_pct": 0.01,
   "started_at": 1785751433522,
-  "last_update": 1786447534009,
+  "last_update": 1786451080497,
   "positions": [
     {
       "id": "GBPUSD-1785830399999",
@@ -25,7 +25,7 @@
       "notional": 350.0,
       "opened_ts": 1785830399999,
       "opened_bar_ts": 1785816000000,
-      "bars_held": 30,
+      "bars_held": 31,
       "realised": 0.0,
       "R": 0.0,
       "scaled_t1": false,
@@ -49,7 +49,7 @@
         }
       },
       "fills": [],
-      "last_price": 1.34968,
+      "last_price": 1.34934,
       "status": "open"
     },
     {
@@ -71,7 +71,7 @@
       "notional": 350.0,
       "opened_ts": 1786103999999,
       "opened_bar_ts": 1786089600000,
-      "bars_held": 11,
+      "bars_held": 12,
       "realised": 0.0,
       "R": 0.0,
       "scaled_t1": false,
@@ -95,7 +95,53 @@
         }
       },
       "fills": [],
-      "last_price": 1.39444,
+      "last_price": 1.39395,
+      "status": "open"
+    },
+    {
+      "id": "GBPAUD-1786449599999",
+      "symbol": "GBPAUD",
+      "market": "forex",
+      "base": "GBP",
+      "quote": "AUD",
+      "side": "short",
+      "qty": 182.54249528085265,
+      "qty_open": 182.54249528085265,
+      "entry": 1.9106195712,
+      "stop": 1.9201778773616387,
+      "cur_stop": 1.9201778773616387,
+      "t1": 1.89156368,
+      "t2": 1.8850554199999998,
+      "risk_per_unit": 0.009137877361638624,
+      "risk_amt": 1.6680509351639288,
+      "notional": 348.7692640592807,
+      "opened_ts": 1786449599999,
+      "opened_bar_ts": 1786435200000,
+      "bars_held": 0,
+      "realised": 0.0,
+      "R": 0.0,
+      "scaled_t1": false,
+      "retrace": 0.4407230196703834,
+      "rr_t1": 2.131383386886204,
+      "anchors": {
+        "p1": {
+          "idx": 764,
+          "price": 1.92601,
+          "ts": 1785758400000
+        },
+        "p2": {
+          "idx": 778,
+          "price": 1.9072,
+          "ts": 1785960000000
+        },
+        "p3": {
+          "idx": 785,
+          "price": 1.91549,
+          "ts": 1786060800000
+        }
+      },
+      "fills": [],
+      "last_price": 1.9106195712,
       "status": "open"
     }
   ],
@@ -1008,36 +1054,42 @@
       "ts": 1786447534009,
       "equity": 996.4836115979449,
       "equity_mtm": 999.6847012553678
+    },
+    {
+      "ts": 1786451080497,
+      "equity": 996.4836115979449,
+      "equity_mtm": 999.7185501331386
     }
   ],
   "last_bar": {
-    "EURUSD": 1786420800000,
-    "USDJPY": 1786420800000,
-    "GBPUSD": 1786420800000,
-    "AUDUSD": 1786420800000,
-    "USDCHF": 1786420800000,
-    "USDCAD": 1786420800000,
-    "NZDUSD": 1786420800000,
-    "EURGBP": 1786420800000,
-    "EURJPY": 1786420800000,
-    "EURCHF": 1786420800000,
-    "AUDJPY": 1786420800000,
-    "CADJPY": 1786420800000,
-    "EURAUD": 1786420800000,
-    "GBPJPY": 1786420800000,
-    "CHFJPY": 1786420800000,
-    "GBPAUD": 1786420800000
+    "EURUSD": 1786435200000,
+    "USDJPY": 1786435200000,
+    "GBPUSD": 1786435200000,
+    "AUDUSD": 1786435200000,
+    "USDCHF": 1786435200000,
+    "USDCAD": 1786435200000,
+    "NZDUSD": 1786435200000,
+    "EURGBP": 1786435200000,
+    "EURJPY": 1786435200000,
+    "EURCHF": 1786435200000,
+    "AUDJPY": 1786435200000,
+    "CADJPY": 1786435200000,
+    "EURAUD": 1786435200000,
+    "GBPJPY": 1786435200000,
+    "CHFJPY": 1786435200000,
+    "GBPAUD": 1786435200000
   },
   "signals": [],
   "errors": [],
-  "unrealised_pnl": 3.201089657422973,
-  "equity_mtm": 999.6847012553678,
+  "unrealised_pnl": 3.2349385351936704,
+  "equity_mtm": 999.7185501331386,
   "events": [
     "OPEN  GBPUSD long @ 1.34372 stop 1.33563 T1 1.36517 T2 1.37201",
     "OPEN  USDCAD short @ 1.40104 stop 1.40659 T1 1.38624 T2 1.38147",
     "OPEN  GBPJPY short @ 212.91 stop 213.375 T1 200.97 T2 197.817",
     "OPEN  CHFJPY short @ 195.015 stop 196.477 T1 185.073 T2 182.203",
     "CLOSE GBPJPY short stop R=-1.18 pnl=$-0.83",
-    "CLOSE CHFJPY short stop R=-1.05 pnl=$-2.69"
+    "CLOSE CHFJPY short stop R=-1.05 pnl=$-2.69",
+    "OPEN  GBPAUD short @ 1.91062 stop 1.92018 T1 1.89156 T2 1.88506"
   ]
 }
