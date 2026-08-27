@@ -4,7 +4,7 @@
   "realised_pnl": 4.221867488004959,
   "risk_pct": 0.01,
   "started_at": 1785751433522,
-  "last_update": 1787787618020,
+  "last_update": 1787807233935,
   "positions": [
     {
       "id": "USDJPY-1787543999999",
@@ -25,7 +25,7 @@
       "notional": 351.1824604533721,
       "opened_ts": 1787543999999,
       "opened_bar_ts": 1787529600000,
-      "bars_held": 16,
+      "bars_held": 18,
       "realised": 0.0,
       "R": 0.0,
       "scaled_t1": false,
@@ -71,7 +71,7 @@
       "notional": 351.47765362080173,
       "opened_ts": 1787673599999,
       "opened_bar_ts": 1787659200000,
-      "bars_held": 7,
+      "bars_held": 9,
       "realised": 0.0,
       "R": 0.0,
       "scaled_t1": false,
@@ -95,7 +95,7 @@
         }
       },
       "fills": [],
-      "last_price": 114.83,
+      "last_price": 114.783,
       "status": "open"
     },
     {
@@ -117,7 +117,7 @@
       "notional": 351.47765362080173,
       "opened_ts": 1787702399999,
       "opened_bar_ts": 1787688000000,
-      "bars_held": 5,
+      "bars_held": 7,
       "realised": 0.0,
       "R": 0.0,
       "scaled_t1": false,
@@ -141,7 +141,53 @@
         }
       },
       "fills": [],
-      "last_price": 114.306,
+      "last_price": 114.452,
+      "status": "open"
+    },
+    {
+      "id": "EURUSD-1787788799999",
+      "symbol": "EURUSD",
+      "market": "forex",
+      "base": "EUR",
+      "quote": "USD",
+      "side": "long",
+      "qty": 301.54011463838606,
+      "qty_open": 301.54011463838606,
+      "entry": 1.1656082775000003,
+      "stop": 1.1629504416697196,
+      "cur_stop": 1.1629504416697196,
+      "t1": 1.1835131199999998,
+      "t2": 1.1885162799999998,
+      "risk_per_unit": 0.0025995583302804715,
+      "risk_amt": 0.7838711169219448,
+      "notional": 351.47765362080173,
+      "opened_ts": 1787788799999,
+      "opened_bar_ts": 1787774400000,
+      "bars_held": 1,
+      "realised": 0.0,
+      "R": 0.0,
+      "scaled_t1": false,
+      "retrace": 0.4156293222683337,
+      "rr_t1": 6.910066141143903,
+      "anchors": {
+        "p1": {
+          "idx": 758,
+          "price": 1.15667,
+          "ts": 1787025600000
+        },
+        "p2": {
+          "idx": 777,
+          "price": 1.17113,
+          "ts": 1787299200000
+        },
+        "p3": {
+          "idx": 788,
+          "price": 1.16512,
+          "ts": 1787630400000
+        }
+      },
+      "fills": [],
+      "last_price": 1.16543,
       "status": "open"
     }
   ],
@@ -4244,30 +4290,35 @@
       "ts": 1787787618020,
       "equity": 1004.2218674880049,
       "equity_mtm": 1003.13952549435
+    },
+    {
+      "ts": 1787807233935,
+      "equity": 1004.2218674880049,
+      "equity_mtm": 1003.3920564439616
     }
   ],
   "last_bar": {
-    "EURUSD": 1787760000000,
-    "USDJPY": 1787760000000,
-    "GBPUSD": 1787760000000,
-    "AUDUSD": 1787760000000,
-    "USDCHF": 1787760000000,
-    "USDCAD": 1787760000000,
-    "NZDUSD": 1787760000000,
-    "EURGBP": 1787760000000,
-    "EURJPY": 1787760000000,
-    "EURCHF": 1787760000000,
-    "AUDJPY": 1787760000000,
-    "CADJPY": 1787760000000,
-    "EURAUD": 1787760000000,
-    "GBPJPY": 1787760000000,
-    "CHFJPY": 1787760000000,
-    "GBPAUD": 1787760000000
+    "EURUSD": 1787788800000,
+    "USDJPY": 1787788800000,
+    "GBPUSD": 1787788800000,
+    "AUDUSD": 1787788800000,
+    "USDCHF": 1787788800000,
+    "USDCAD": 1787788800000,
+    "NZDUSD": 1787788800000,
+    "EURGBP": 1787788800000,
+    "EURJPY": 1787788800000,
+    "EURCHF": 1787788800000,
+    "AUDJPY": 1787788800000,
+    "CADJPY": 1787788800000,
+    "EURAUD": 1787788800000,
+    "GBPJPY": 1787788800000,
+    "CHFJPY": 1787788800000,
+    "GBPAUD": 1787788800000
   },
   "signals": [],
   "errors": [],
-  "unrealised_pnl": -1.082341993654984,
-  "equity_mtm": 1003.13952549435,
+  "unrealised_pnl": -0.8298110440433675,
+  "equity_mtm": 1003.3920564439616,
   "events": [
     "OPEN  GBPUSD long @ 1.34372 stop 1.33563 T1 1.36517 T2 1.37201",
     "OPEN  USDCAD short @ 1.40104 stop 1.40659 T1 1.38624 T2 1.38147",
@@ -4287,6 +4338,7 @@
     "OPEN  USDJPY short @ 158.925 stop 159.667 T1 156.955 T2 156.349",
     "CLOSE GBPAUD short time R=+0.51 pnl=$+0.84",
     "OPEN  CADJPY long @ 115.103 stop 114.49 T1 116.721 T2 117.239",
-    "OPEN  AUDJPY long @ 114.084 stop 113.363 T1 116.124 T2 116.793"
+    "OPEN  AUDJPY long @ 114.084 stop 113.363 T1 116.124 T2 116.793",
+    "OPEN  EURUSD long @ 1.16561 stop 1.16295 T1 1.18351 T2 1.18852"
   ]
 }
