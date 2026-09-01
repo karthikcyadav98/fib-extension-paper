@@ -4,7 +4,7 @@
   "realised_pnl": -4.439900032128943,
   "risk_pct": 0.01,
   "started_at": 1785751433522,
-  "last_update": 1788219807666,
+  "last_update": 1788228273252,
   "positions": [
     {
       "id": "CADJPY-1787673599999",
@@ -25,7 +25,7 @@
       "notional": 351.47765362080173,
       "opened_ts": 1787673599999,
       "opened_bar_ts": 1787659200000,
-      "bars_held": 25,
+      "bars_held": 26,
       "realised": 0.0,
       "R": 0.0,
       "scaled_t1": false,
@@ -49,7 +49,7 @@
         }
       },
       "fills": [],
-      "last_price": 115.269,
+      "last_price": 115.33,
       "status": "open"
     },
     {
@@ -71,7 +71,7 @@
       "notional": 351.47765362080173,
       "opened_ts": 1787702399999,
       "opened_bar_ts": 1787688000000,
-      "bars_held": 23,
+      "bars_held": 24,
       "realised": 0.0,
       "R": 0.0,
       "scaled_t1": false,
@@ -95,7 +95,53 @@
         }
       },
       "fills": [],
-      "last_price": 114.479,
+      "last_price": 114.555,
+      "status": "open"
+    },
+    {
+      "id": "AUDUSD-1788220799999",
+      "symbol": "AUDUSD",
+      "market": "forex",
+      "base": "AUD",
+      "quote": "USD",
+      "side": "long",
+      "qty": 485.8778696339818,
+      "qty_open": 485.8778696339818,
+      "entry": 0.7171473672,
+      "stop": 0.7135568974237341,
+      "cur_stop": 0.7135568974237341,
+      "t1": 0.72428856,
+      "t2": 0.72670364,
+      "risk_per_unit": 0.003533102576265934,
+      "risk_amt": 1.7166563529544248,
+      "notional": 348.4460349887549,
+      "opened_ts": 1788220799999,
+      "opened_bar_ts": 1788206400000,
+      "bars_held": 0,
+      "realised": 0.0,
+      "R": 0.0,
+      "scaled_t1": false,
+      "retrace": 0.766475644699137,
+      "rr_t1": 2.037461365644238,
+      "anchors": {
+        "p1": {
+          "idx": 772,
+          "price": 0.71378,
+          "ts": 1787644800000
+        },
+        "p2": {
+          "idx": 791,
+          "price": 0.72076,
+          "ts": 1787918400000
+        },
+        "p3": {
+          "idx": 794,
+          "price": 0.71541,
+          "ts": 1788134400000
+        }
+      },
+      "fills": [],
+      "last_price": 0.7171473672,
       "status": "open"
     }
   ],
@@ -4588,30 +4634,35 @@
       "ts": 1788219807666,
       "equity": 995.5600999678711,
       "equity_mtm": 997.2836636616582
+    },
+    {
+      "ts": 1788228273252,
+      "equity": 995.5600999678711,
+      "equity_mtm": 997.7040786348488
     }
   ],
   "last_bar": {
-    "EURUSD": 1788192000000,
-    "USDJPY": 1788192000000,
-    "GBPUSD": 1788192000000,
-    "AUDUSD": 1788192000000,
-    "USDCHF": 1788192000000,
-    "USDCAD": 1788192000000,
-    "NZDUSD": 1788192000000,
-    "EURGBP": 1788192000000,
-    "EURJPY": 1788192000000,
-    "EURCHF": 1788192000000,
-    "AUDJPY": 1788192000000,
-    "CADJPY": 1788192000000,
-    "EURAUD": 1788192000000,
-    "GBPJPY": 1788192000000,
-    "CHFJPY": 1788192000000,
-    "GBPAUD": 1788192000000
+    "EURUSD": 1788206400000,
+    "USDJPY": 1788206400000,
+    "GBPUSD": 1788206400000,
+    "AUDUSD": 1788206400000,
+    "USDCHF": 1788206400000,
+    "USDCAD": 1788206400000,
+    "NZDUSD": 1788206400000,
+    "EURGBP": 1788206400000,
+    "EURJPY": 1788206400000,
+    "EURCHF": 1788206400000,
+    "AUDJPY": 1788206400000,
+    "CADJPY": 1788206400000,
+    "EURAUD": 1788206400000,
+    "GBPJPY": 1788206400000,
+    "CHFJPY": 1788206400000,
+    "GBPAUD": 1788206400000
   },
   "signals": [],
   "errors": [],
-  "unrealised_pnl": 1.7235636937871024,
-  "equity_mtm": 997.2836636616582,
+  "unrealised_pnl": 2.1439786669776506,
+  "equity_mtm": 997.7040786348488,
   "events": [
     "OPEN  GBPUSD long @ 1.34372 stop 1.33563 T1 1.36517 T2 1.37201",
     "OPEN  USDCAD short @ 1.40104 stop 1.40659 T1 1.38624 T2 1.38147",
@@ -4640,6 +4691,7 @@
     "CLOSE EURUSD long stop R=-1.04 pnl=$-0.82",
     "CLOSE USDCHF short stop R=-1.05 pnl=$-1.36",
     "CLOSE NZDUSD long stop R=-1.03 pnl=$-3.04",
-    "CLOSE EURJPY long stop R=-1.04 pnl=$-1.79"
+    "CLOSE EURJPY long stop R=-1.04 pnl=$-1.79",
+    "OPEN  AUDUSD long @ 0.717147 stop 0.713557 T1 0.724289 T2 0.726704"
   ]
 }
