@@ -4,7 +4,7 @@
   "realised_pnl": -12.517768927159295,
   "risk_pct": 0.01,
   "started_at": 1785751433522,
-  "last_update": 1789498953985,
+  "last_update": 1789509927422,
   "positions": [
     {
       "id": "EURJPY-1788767999999",
@@ -25,7 +25,7 @@
       "notional": 346.35887437365716,
       "opened_ts": 1788767999999,
       "opened_bar_ts": 1788753600000,
-      "bars_held": 38,
+      "bars_held": 39,
       "realised": 0.0,
       "R": 0.0,
       "scaled_t1": false,
@@ -49,7 +49,7 @@
         }
       },
       "fills": [],
-      "last_price": 179.021,
+      "last_price": 179.02,
       "status": "open"
     },
     {
@@ -71,7 +71,7 @@
       "notional": 346.35887437365716,
       "opened_ts": 1789099199999,
       "opened_bar_ts": 1789084800000,
-      "bars_held": 15,
+      "bars_held": 16,
       "realised": 0.0,
       "R": 0.0,
       "scaled_t1": false,
@@ -95,7 +95,7 @@
         }
       },
       "fills": [],
-      "last_price": 111.447,
+      "last_price": 111.455,
       "status": "open"
     },
     {
@@ -117,7 +117,7 @@
       "notional": 346.35887437365716,
       "opened_ts": 1789142399999,
       "opened_bar_ts": 1789128000000,
-      "bars_held": 12,
+      "bars_held": 13,
       "realised": 0.0,
       "R": 0.0,
       "scaled_t1": false,
@@ -141,7 +141,7 @@
         }
       },
       "fills": [],
-      "last_price": 155.107,
+      "last_price": 155.116,
       "status": "open"
     }
   ],
@@ -5383,30 +5383,35 @@
       "ts": 1789498953985,
       "equity": 987.4822310728408,
       "equity_mtm": 987.9433911017425
+    },
+    {
+      "ts": 1789509927422,
+      "equity": 987.4822310728408,
+      "equity_mtm": 987.9001805635444
     }
   ],
   "last_bar": {
-    "EURUSD": 1789473600000,
-    "USDJPY": 1789473600000,
-    "GBPUSD": 1789473600000,
-    "AUDUSD": 1789473600000,
-    "USDCHF": 1789473600000,
-    "USDCAD": 1789473600000,
-    "NZDUSD": 1789473600000,
-    "EURGBP": 1789473600000,
-    "EURJPY": 1789473600000,
-    "EURCHF": 1789473600000,
-    "AUDJPY": 1789473600000,
-    "CADJPY": 1789473600000,
-    "EURAUD": 1789473600000,
-    "GBPJPY": 1789473600000,
-    "CHFJPY": 1789473600000,
-    "GBPAUD": 1789473600000
+    "EURUSD": 1789488000000,
+    "USDJPY": 1789488000000,
+    "GBPUSD": 1789488000000,
+    "AUDUSD": 1789488000000,
+    "USDCHF": 1789488000000,
+    "USDCAD": 1789488000000,
+    "NZDUSD": 1789488000000,
+    "EURGBP": 1789488000000,
+    "EURJPY": 1789488000000,
+    "EURCHF": 1789488000000,
+    "AUDJPY": 1789488000000,
+    "CADJPY": 1789488000000,
+    "EURAUD": 1789488000000,
+    "GBPJPY": 1789488000000,
+    "CHFJPY": 1789488000000,
+    "GBPAUD": 1789488000000
   },
   "signals": [],
   "errors": [],
-  "unrealised_pnl": 0.4611600289016229,
-  "equity_mtm": 987.9433911017425,
+  "unrealised_pnl": 0.4179494907035348,
+  "equity_mtm": 987.9001805635444,
   "events": [
     "OPEN  GBPUSD long @ 1.34372 stop 1.33563 T1 1.36517 T2 1.37201",
     "OPEN  USDCAD short @ 1.40104 stop 1.40659 T1 1.38624 T2 1.38147",
