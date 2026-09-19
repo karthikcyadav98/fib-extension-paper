@@ -1,12 +1,9 @@
 {
-  "generated": 1789843698201,
+  "generated": 1789851893425,
   "pairs": {
     "EURUSD": {
       "interval": "4h",
-      "live": {
-        "price": 1.14859,
-        "ts": 1789764900000
-      },
+      "live": null,
       "last": 1.14864,
       "last_ts": 1789761599999,
       "bars": [
@@ -996,10 +993,7 @@
     },
     "USDJPY": {
       "interval": "4h",
-      "live": {
-        "price": 156.873,
-        "ts": 1789764900000
-      },
+      "live": null,
       "last": 156.732,
       "last_ts": 1789761599999,
       "bars": [
@@ -2014,10 +2008,7 @@
     },
     "GBPUSD": {
       "interval": "4h",
-      "live": {
-        "price": 1.3394,
-        "ts": 1789764900000
-      },
+      "live": null,
       "last": 1.33941,
       "last_ts": 1789761599999,
       "bars": [
@@ -3007,10 +2998,7 @@
     },
     "AUDUSD": {
       "interval": "4h",
-      "live": {
-        "price": 0.71247,
-        "ts": 1789764900000
-      },
+      "live": null,
       "last": 0.71262,
       "last_ts": 1789761599999,
       "bars": [
@@ -4000,10 +3988,7 @@
     },
     "USDCHF": {
       "interval": "4h",
-      "live": {
-        "price": 0.82211,
-        "ts": 1789764900000
-      },
+      "live": null,
       "last": 0.82193,
       "last_ts": 1789761599999,
       "bars": [
@@ -5026,10 +5011,7 @@
     },
     "USDCAD": {
       "interval": "4h",
-      "live": {
-        "price": 1.39829,
-        "ts": 1789764900000
-      },
+      "live": null,
       "last": 1.39917,
       "last_ts": 1789761599999,
       "bars": [
@@ -6044,10 +6026,7 @@
     },
     "NZDUSD": {
       "interval": "4h",
-      "live": {
-        "price": 0.57231,
-        "ts": 1789764900000
-      },
+      "live": null,
       "last": 0.57245,
       "last_ts": 1789761599999,
       "bars": [
@@ -7037,10 +7016,7 @@
     },
     "EURGBP": {
       "interval": "4h",
-      "live": {
-        "price": 0.85754,
-        "ts": 1789764900000
-      },
+      "live": null,
       "last": 0.85756,
       "last_ts": 1789761599999,
       "bars": [
@@ -8030,10 +8006,7 @@
     },
     "EURJPY": {
       "interval": "4h",
-      "live": {
-        "price": 180.2,
-        "ts": 1789764900000
-      },
+      "live": null,
       "last": 180.05,
       "last_ts": 1789761599999,
       "bars": [
@@ -9056,10 +9029,7 @@
     },
     "EURCHF": {
       "interval": "4h",
-      "live": {
-        "price": 0.94425,
-        "ts": 1789764900000
-      },
+      "live": null,
       "last": 0.9441,
       "last_ts": 1789761599999,
       "bars": [
@@ -10049,10 +10019,7 @@
     },
     "AUDJPY": {
       "interval": "4h",
-      "live": {
-        "price": 111.765,
-        "ts": 1789764900000
-      },
+      "live": null,
       "last": 111.687,
       "last_ts": 1789761599999,
       "bars": [
@@ -11042,10 +11009,7 @@
     },
     "CADJPY": {
       "interval": "4h",
-      "live": {
-        "price": 112.211,
-        "ts": 1789764900000
-      },
+      "live": null,
       "last": 112.04,
       "last_ts": 1789761599999,
       "bars": [
@@ -12060,10 +12024,7 @@
     },
     "EURAUD": {
       "interval": "4h",
-      "live": {
-        "price": 1.61212,
-        "ts": 1789764900000
-      },
+      "live": null,
       "last": 1.61187,
       "last_ts": 1789761599999,
       "bars": [
@@ -13053,10 +13014,7 @@
     },
     "GBPJPY": {
       "interval": "4h",
-      "live": {
-        "price": 210.119,
-        "ts": 1789764900000
-      },
+      "live": null,
       "last": 209.931,
       "last_ts": 1789761599999,
       "bars": [
@@ -14046,10 +14004,7 @@
     },
     "CHFJPY": {
       "interval": "4h",
-      "live": {
-        "price": 190.884,
-        "ts": 1789764900000
-      },
+      "live": null,
       "last": 190.751,
       "last_ts": 1789761599999,
       "bars": [
@@ -15039,10 +14994,7 @@
     },
     "GBPAUD": {
       "interval": "4h",
-      "live": {
-        "price": 1.87995,
-        "ts": 1789764900000
-      },
+      "live": null,
       "last": 1.87954,
       "last_ts": 1789761599999,
       "bars": [
