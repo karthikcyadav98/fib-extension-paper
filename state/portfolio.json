@@ -4,7 +4,7 @@
   "realised_pnl": -20.02326112866326,
   "risk_pct": 0.01,
   "started_at": 1785751433522,
-  "last_update": 1789966028555,
+  "last_update": 1789985708596,
   "positions": [
     {
       "id": "EURJPY-1788767999999",
@@ -5639,6 +5639,11 @@
       "ts": 1789966028555,
       "equity": 979.9767388713369,
       "equity_mtm": 982.9088675576836
+    },
+    {
+      "ts": 1789985708596,
+      "equity": 979.9767388713369,
+      "equity_mtm": 982.9088675576836
     }
   ],
   "last_bar": {
@@ -5660,7 +5665,24 @@
     "GBPAUD": 1789948800000
   },
   "signals": [],
-  "errors": [],
+  "errors": [
+    "EURUSD: handshake failed: HTTP/1.1 520 <none>",
+    "USDJPY: handshake failed: HTTP/1.1 520 <none>",
+    "GBPUSD: handshake failed: HTTP/1.1 520 <none>",
+    "AUDUSD: handshake failed: HTTP/1.1 520 <none>",
+    "USDCHF: handshake failed: HTTP/1.1 520 <none>",
+    "USDCAD: handshake failed: HTTP/1.1 520 <none>",
+    "NZDUSD: handshake failed: HTTP/1.1 520 <none>",
+    "EURGBP: handshake failed: HTTP/1.1 520 <none>",
+    "EURJPY: handshake failed: HTTP/1.1 520 <none>",
+    "EURCHF: handshake failed: HTTP/1.1 520 <none>",
+    "AUDJPY: handshake failed: HTTP/1.1 520 <none>",
+    "CADJPY: handshake failed: HTTP/1.1 520 <none>",
+    "EURAUD: handshake failed: HTTP/1.1 520 <none>",
+    "GBPJPY: handshake failed: HTTP/1.1 520 <none>",
+    "CHFJPY: handshake failed: HTTP/1.1 520 <none>",
+    "GBPAUD: handshake failed: HTTP/1.1 520 <none>"
+  ],
   "unrealised_pnl": 2.9321286863466427,
   "equity_mtm": 982.9088675576836,
   "events": [
