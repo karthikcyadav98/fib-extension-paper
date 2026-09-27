@@ -4,7 +4,7 @@
   "realised_pnl": -20.02326112866326,
   "risk_pct": 0.01,
   "started_at": 1785751433522,
-  "last_update": 1790543793920,
+  "last_update": 1790553090593,
   "positions": [
     {
       "id": "EURJPY-1788767999999",
@@ -5839,6 +5839,11 @@
       "ts": 1790543793920,
       "equity": 979.9767388713369,
       "equity_mtm": 982.9088675576836
+    },
+    {
+      "ts": 1790553090593,
+      "equity": 979.9767388713369,
+      "equity_mtm": 982.9088675576836
     }
   ],
   "last_bar": {
@@ -5861,7 +5866,7 @@
   },
   "signals": [],
   "errors": [
-    "EURUSD: [Errno 104] Connection reset by peer",
+    "EURUSD: handshake failed: HTTP/1.1 520 <none>",
     "USDJPY: handshake failed: HTTP/1.1 520 <none>",
     "GBPUSD: handshake failed: HTTP/1.1 520 <none>",
     "AUDUSD: handshake failed: HTTP/1.1 520 <none>",
